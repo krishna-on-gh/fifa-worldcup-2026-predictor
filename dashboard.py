@@ -234,8 +234,7 @@ with tab_champ:
     st.bar_chart(champ.head(15).set_index('team')['prob'], horizontal=True, height=500)
     st.dataframe(
         champ.rename(columns={'team': 'Team', 'prob': 'Title %'})
-             .style.format({'Title %': '{:.1f}%'})
-             .background_gradient(subset=['Title %'], cmap='Greens'),
+             .style.format({'Title %': '{:.1f}%'}),
         hide_index=True, use_container_width=True, height=400,
     )
 
@@ -247,8 +246,7 @@ with tab_runs:
             for t, sd in data['stage_odds'].items()]
     df = pd.DataFrame(rows).sort_values('Champion', ascending=False)
     st.dataframe(
-        df.style.format({s: '{:.0f}%' for s in stages})
-                .background_gradient(subset=stages, cmap='Blues'),
+        df.style.format({s: '{:.0f}%' for s in stages}),
         hide_index=True, use_container_width=True, height=600,
     )
 
