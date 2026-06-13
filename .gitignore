@@ -1,0 +1,12 @@
+# Secrets — never commit your API key
+api_key.txt
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+
+# Large source data not needed by the deployed dashboard
+# (results.csv / squad_strength.csv are predictor.py inputs; uncomment to keep them out)
+# results.csv
+# squad_strength.csv
