@@ -148,32 +148,75 @@ tab_games, tab_champ, tab_runs, tab_groups = st.tabs(
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
 
 
+def _outcome(hs, as_):
+    return 'home' if hs > as_ else ('away' if hs < as_ else 'draw')
+
+
+def fixture_result(fx_row, live_info):
+    """For a fixture + its live data, return (completed, pred_out, actual_out).
+       completed=True only for finished games; pred_out is None if no model line."""
+    home, away = fx_row['home'], fx_row['away']
+    if not (live_info and live_info.get('home_score') is not None):
+        return False, None, None
+    if live_info.get('status') in LIVE_STATUSES:
+        return False, None, None      # still in progress, not final
+    if live_info.get('home') == home:
+        hs, as_ = live_info['home_score'], live_info['away_score']
+    else:
+        hs, as_ = live_info['away_score'], live_info['home_score']
+    pred = pred_lookup.get(frozenset((home, away)))
+    pred_out = None
+    if pred:
+        if pred['home'] == home:
+            ph, pd_, pa = pred['p_home'], pred['p_draw'], pred['p_away']
+        else:
+            ph, pd_, pa = pred['p_away'], pred['p_draw'], pred['p_home']
+        pred_out = max((('home', ph), ('draw', pd_), ('away', pa)), key=lambda x: x[1])[0]
+    return True, pred_out, _outcome(hs, as_)
+
+
 def render_match_card(fx_row, live_info, show_pred=True):
-    """Render one match: teams, live/predicted state, our probabilities."""
+    """Render one match: teams, completion status, score, and how the model did."""
     home, away = fx_row['home'], fx_row['away']
     when = (fx_row['dt'].tz_convert(ET).strftime('%b %d, %I:%M %p ET')
             if pd.notna(fx_row['dt']) else fx_row['date'])
     stage = fx_row['stage']
 
-    if live_info and live_info.get('home_score') is not None:
-        score = f"### {home}  {live_info['home_score']} – {live_info['away_score']}  {away}"
+    # Model prediction, oriented to this fixture's home/away
+    pred = pred_lookup.get(frozenset((home, away)))
+    ph = pd_ = pa = pred_out = None
+    if pred:
+        if pred['home'] == home:
+            ph, pd_, pa = pred['p_home'], pred['p_draw'], pred['p_away']
+        else:
+            ph, pd_, pa = pred['p_away'], pred['p_draw'], pred['p_home']
+        pred_out = max((('home', ph), ('draw', pd_), ('away', pa)), key=lambda x: x[1])[0]
+
+    has_score = live_info and live_info.get('home_score') is not None
+    if has_score:
+        # Orient the API score to the fixture's home/away
+        if live_info.get('home') == home:
+            hs, as_ = live_info['home_score'], live_info['away_score']
+        else:
+            hs, as_ = live_info['away_score'], live_info['home_score']
         status = live_info.get('status', '')
-        badge = "🔴 LIVE" if status in LIVE_STATUSES else ("✅ FT" if status == 'FINISHED' else status)
-        st.markdown(score)
-        st.caption(f"{stage} · {when} · {badge}")
+        st.markdown(f"### {home}  {int(hs)} – {int(as_)}  {away}")
+
+        if status in LIVE_STATUSES:
+            st.caption(f"{stage} · {when} · 🔴 LIVE")
+        else:  # completed
+            line = f"{stage} · {when} · 🏁 FINAL"
+            if pred_out is not None:
+                line += "  ·  model ✅ called it" if pred_out == _outcome(hs, as_) \
+                        else "  ·  model ❌ missed"
+            st.caption(line)
     else:
         st.markdown(f"**{home}**  vs  **{away}**")
-        st.caption(f"{stage} · {when}")
+        st.caption(f"{stage} · {when} · ⏳ scheduled")
 
-    if show_pred:
-        pred = pred_lookup.get(frozenset((home, away)))
-        if pred:
-            # orient probabilities to the fixture's home/away
-            if pred['home'] == home:
-                ph, pd_, pa = pred['p_home'], pred['p_draw'], pred['p_away']
-            else:
-                ph, pd_, pa = pred['p_away'], pred['p_draw'], pred['p_home']
-            st.caption(f"Model: {home} {ph:.0%} · draw {pd_:.0%} · {away} {pa:.0%}")
+    if show_pred and ph is not None:
+        pick = {'home': home, 'draw': 'draw', 'away': away}[pred_out]
+        st.caption(f"Model: {home} {ph:.0%} · draw {pd_:.0%} · {away} {pa:.0%}  ·  pick: **{pick}**")
 
 
 # ===== TAB: Game by Game =====
@@ -190,6 +233,19 @@ with tab_games:
                     "(see dashboard.py header).")
         elif '_error' in live:
             st.warning(f"Live scores unavailable: {live['_error']}")
+
+        # ---- Model accuracy scoreboard (completed games so far) ----
+        graded = [(p, a) for _, fx in fixtures.iterrows()
+                  for done, p, a in [fixture_result(fx, live.get(frozenset((fx['home'], fx['away']))))]
+                  if done and p is not None]
+        total = len(graded)
+        correct = sum(p == a for p, a in graded)
+        m1, m2 = st.columns(2)
+        m1.metric("Model accuracy so far", f"{correct/total:.0%}" if total else "—")
+        m2.metric("Games graded", f"{correct}/{total}" if total else "0")
+        if not total:
+            st.caption("No completed games with predictions yet — accuracy fills in as games finish.")
+        st.divider()
 
         today = datetime.now(ET).date()
 
