@@ -725,8 +725,33 @@ compare_probs('Argentina', 'Jordan')
 # EXPORT — write all predictions to predictions.json for the dashboard
 # ============================================================
 import json
+import os
 
 STAGE_ORDER = ['R32', 'R16', 'QF', 'SF', 'Final', 'Champion']
+
+# Freeze per-game predictions for games already played: never re-predict a
+# match in hindsight. A WC pairing present in df (NaN scores were dropped) is
+# a played game; keep its prediction from the existing predictions.json.
+_played_pairs = {frozenset((r['home_team'], r['away_team']))
+                 for _, r in df[(df['tournament'] == 'FIFA World Cup')
+                                & (df['date'].dt.year == 2026)].iterrows()}
+_locked_gm = {}
+if os.path.exists('predictions.json'):
+    try:
+        _prev = json.load(open('predictions.json', encoding='utf-8'))
+        for _ms in _prev.get('group_matches', {}).values():
+            for _m in _ms:
+                _locked_gm[frozenset((_m['home'], _m['away']))] = _m
+    except Exception:
+        pass
+
+def _gm_entry(h, a, ph, pd_, pa):
+    pair = frozenset((h, a))
+    if pair in _played_pairs and pair in _locked_gm:
+        return _locked_gm[pair]          # locked pre-game prediction
+    return {'home': h, 'away': a,
+            'p_home': round(float(ph), 3), 'p_draw': round(float(pd_), 3),
+            'p_away': round(float(pa), 3)}
 
 export = {
     'generated': str(pd.Timestamp.now()),
@@ -737,12 +762,9 @@ export = {
             for i, (t, p) in enumerate(standings)]
         for g, standings in group_standings.items()
     },
-    # Per-match group probabilities
+    # Per-match group probabilities (played games keep their pre-game values)
     'group_matches': {
-        g: [{'home': h, 'away': a,
-             'p_home': round(float(ph), 3), 'p_draw': round(float(pd_), 3),
-             'p_away': round(float(pa), 3)}
-            for (h, a, ph, pd_, pa) in matches]
+        g: [_gm_entry(h, a, ph, pd_, pa) for (h, a, ph, pd_, pa) in matches]
         for g, matches in group_matches.items()
     },
     # Championship odds (all 32, sorted)
