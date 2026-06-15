@@ -269,18 +269,30 @@ X_test,  y_test  = test[feature_cols],  test[target_col]
 print(f"Training matches: {len(X_train)}")
 print(f"Testing matches:  {len(X_test)}")
 
-# ---- Build and train the model ----
-model = XGBClassifier(
-    n_estimators=300,      # number of trees
-    max_depth=4,           # how deep each tree can go (small = less overfitting)
-    learning_rate=0.05,    # how much each tree contributes (smaller = more careful)
-    subsample=0.9,         # use 90% of rows per tree (adds robustness)
-    objective='multi:softprob',  # output probabilities for 3 classes
-    eval_metric='mlogloss',
-    random_state=42,
-)
+# ---- Build the model: train ONCE, then reuse the saved copy ----
+# Same model every run (deterministic). Re-training is non-deterministic
+# (XGBoost multi-threading), which added meaningless run-to-run noise to idle
+# games. Train once, persist, load thereafter. Delete model.pkl to retrain.
+import os
+import joblib
 
-model.fit(X_train, y_train)
+MODEL_PATH = 'model.pkl'
+if os.path.exists(MODEL_PATH):
+    model = joblib.load(MODEL_PATH)
+    print(f"\nLoaded frozen model from {MODEL_PATH}")
+else:
+    model = XGBClassifier(
+        n_estimators=300,      # number of trees
+        max_depth=4,           # how deep each tree can go (small = less overfitting)
+        learning_rate=0.05,    # how much each tree contributes (smaller = more careful)
+        subsample=0.9,         # use 90% of rows per tree (adds robustness)
+        objective='multi:softprob',  # output probabilities for 3 classes
+        eval_metric='mlogloss',
+        random_state=42,
+    )
+    model.fit(X_train, y_train)
+    joblib.dump(model, MODEL_PATH)
+    print(f"\nTrained and saved model to {MODEL_PATH}")
 
 # ---- Evaluate ----
 preds  = model.predict(X_test)               # most likely outcome per match
@@ -417,6 +429,16 @@ def expected_points(home, away):
     away_pts = 3 * p_away + 1 * p_draw
     return home_pts, away_pts, p_home, p_draw, p_away
 
+# Actual points from 2026 WC group games already played (for a LIVE table:
+# played games count their real 3/1/0; unplayed games use expected points).
+actual_wc_pts = {}   # frozenset(home, away) -> {team: points}
+for r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
+    h, a = r.home_team, r.away_team
+    if r.home_score > r.away_score: hp, ap = 3, 0
+    elif r.home_score < r.away_score: hp, ap = 0, 3
+    else: hp, ap = 1, 1
+    actual_wc_pts[frozenset((h, a))] = {h: hp, a: ap}
+
 group_standings = {}   # group_name -> ordered list of (team, xPts)
 group_matches = {}     # group_name -> list of (home, away, p_home, p_draw, p_away)
 
@@ -427,8 +449,13 @@ for group_name, teams in groups.items():
 
     for home, away in combinations(teams, 2):
         h_pts, a_pts, ph, pd_, pa = expected_points(home, away)
-        table[home] += h_pts
-        table[away] += a_pts
+        pair = frozenset((home, away))
+        if pair in actual_wc_pts:                 # played -> ACTUAL points
+            table[home] += actual_wc_pts[pair][home]
+            table[away] += actual_wc_pts[pair][away]
+        else:                                     # not played -> expected points
+            table[home] += h_pts
+            table[away] += a_pts
         matches.append((home, away, ph, pd_, pa))
         print(f"  {home:<16} vs {away:<16}  "
               f"{ph:.0%}/{pd_:.0%}/{pa:.0%}")
@@ -569,6 +596,7 @@ def simulate_once(teams, reached):
     return teams[0]
 
 # ---- 5. Run it 10,000 times and tally champions + rounds reached ----
+random.seed(42)   # reproducible odds: same inputs -> same odds, only real results move them
 N = 10_000
 titles = defaultdict(int)
 reached = defaultdict(lambda: defaultdict(int))   # team -> stage -> count

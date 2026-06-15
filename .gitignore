@@ -6,6 +6,9 @@ api_key.txt
 __pycache__/
 *.pyc
 
+# Trained model artifact (regenerated locally on first run)
+model.pkl
+
 # Large source data not needed by the deployed dashboard
 # (results.csv / squad_strength.csv are predictor.py inputs; uncomment to keep them out)
 # results.csv
