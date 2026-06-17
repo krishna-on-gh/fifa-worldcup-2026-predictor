@@ -28,7 +28,7 @@ API_NAME_MAP = {
     'USA': 'United States', 'United States of America': 'United States',
     'Czechia': 'Czech Republic', 'Türkiye': 'Turkey', 'Turkiye': 'Turkey',
     "Côte d'Ivoire": 'Ivory Coast', "Cote d'Ivoire": 'Ivory Coast',
-    'Cape Verde Islands': 'Cape Verde',
+    'Cape Verde Islands': 'Cape Verde', 'Congo DR': 'DR Congo',
     'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
 }
 
