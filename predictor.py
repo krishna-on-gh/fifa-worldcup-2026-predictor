@@ -540,25 +540,38 @@ else:
 # ============================================================
 import random
 
-# ---- 1. Assemble the 32 qualifiers ----
-# Top 2 from each group advance automatically (24 teams).
-qualifiers = []   # list of (team, xPts)
-thirds = []
-for g, standings in group_standings.items():
-    qualifiers.append(standings[0])   # group winner
-    qualifiers.append(standings[1])   # runner-up
-    thirds.append(standings[2])       # third place
+# ---- 1. Group positions (deterministic from standings: 1st / 2nd / 3rd) ----
+winner = {g: s[0][0] for g, s in group_standings.items()}
+runner = {g: s[1][0] for g, s in group_standings.items()}
+third  = {g: s[2] for g, s in group_standings.items()}     # (team, pts)
+# The 8 best third-place teams (by points) advance.
+best_third_groups = [g for g, _ in sorted(third.items(), key=lambda kv: kv[1][1], reverse=True)[:8]]
+print(f"\nQualifiers: 32 (12 winners, 12 runners-up, 8 best thirds)")
 
-# The 8 best third-place teams also advance (by xPts).
-thirds_sorted = sorted(thirds, key=lambda x: x[1], reverse=True)
-qualifiers += thirds_sorted[:8]
+# ---- 2. Assign the 8 best thirds to their allowed R32 slots (official FIFA structure) ----
+# Each third-place slot can only take a third from a fixed set of groups.
+THIRD_SLOTS = {74: set('ABCDF'), 77: set('CDFGH'), 79: set('CEFHI'), 80: set('EHIJK'),
+               81: set('BEFIJ'), 82: set('AEHIJ'), 85: set('EFGIJ'), 87: set('DEIJL')}
+def _assign_thirds(groups_in):
+    """Bipartite matching: each qualifying third-group -> a slot whose set allows it."""
+    match = {}   # slot -> group
+    def aug(g, seen):
+        for s, allowed in THIRD_SLOTS.items():
+            if g in allowed and s not in seen:
+                seen.add(s)
+                if s not in match or aug(match[s], seen):
+                    match[s] = g
+                    return True
+        return False
+    for g in groups_in:
+        aug(g, set())
+    return {s: gg for s, gg in match.items()}
+_third_slot = _assign_thirds(best_third_groups)
+def third_team(slot):
+    g = _third_slot.get(slot)
+    return third[g][0] if g else None
 
-# Seed the bracket by group performance (best xPts = top seed).
-qualifiers.sort(key=lambda x: x[1], reverse=True)
-seed_teams = [t for t, _ in qualifiers]
-print(f"\nQualifiers: {len(seed_teams)} teams")
-
-# ---- 2. Advance probability (draw resolved ~50/50 on penalties) ----
+# ---- 3. Advance probability (draw resolved ~50/50 on penalties) ----
 _adv_cache = {}
 def advance_prob(a, b):
     if (a, b) not in _adv_cache:
@@ -566,34 +579,41 @@ def advance_prob(a, b):
         p = predict_match(a, b, host_team=host)
         _adv_cache[(a, b)] = p[f'{a} win'] + 0.5 * p['draw']
     return _adv_cache[(a, b)]
+def _play(a, b):
+    return a if random.random() < advance_prob(a, b) else b
 
-# ---- 3. Standard seeded bracket order (top seeds meet latest) ----
-def seed_order(n):
-    order = [0]
-    while len(order) < n:
-        m = len(order) * 2
-        order = [x for pair in ((s, m - 1 - s) for s in order) for x in pair]
-    return order
+# ---- 4. The REAL 2026 bracket: Round-of-32 matchups by group position ----
+R32 = {
+    73: (runner['A'], runner['B']),   74: (winner['E'], third_team(74)),
+    75: (winner['F'], runner['C']),   76: (winner['C'], runner['F']),
+    77: (winner['I'], third_team(77)), 78: (runner['E'], runner['I']),
+    79: (winner['A'], third_team(79)), 80: (winner['L'], third_team(80)),
+    81: (winner['D'], third_team(81)), 82: (winner['G'], third_team(82)),
+    83: (runner['K'], runner['L']),   84: (winner['H'], runner['J']),
+    85: (winner['B'], third_team(85)), 86: (winner['J'], runner['H']),
+    87: (winner['K'], third_team(87)), 88: (runner['D'], runner['G']),
+}
+# Fixed tree — each match's two inputs are the WINNERS of earlier matches.
+# Label = the stage a match WINNER reaches.
+ROUNDS = [
+    ('QF',       {89: (74, 77), 90: (73, 75), 91: (76, 78), 92: (79, 80),
+                  93: (83, 84), 94: (81, 82), 95: (86, 88), 96: (85, 87)}),
+    ('SF',       {97: (89, 90), 98: (93, 94), 99: (91, 92), 100: (95, 96)}),
+    ('Final',    {101: (97, 98), 102: (99, 100)}),
+    ('Champion', {104: (101, 102)}),
+]
 
-bracket = [seed_teams[i] for i in seed_order(len(seed_teams))]
-
-# ---- 4. Simulate the whole bracket once, tracking how far each team gets ----
-# Stage names by the size of the field that "reached" it.
-STAGES = {32: 'R32', 16: 'R16', 8: 'QF', 4: 'SF', 2: 'Final', 1: 'Champion'}
-
-def simulate_once(teams, reached):
-    teams = teams[:]
-    for t in teams:
-        reached[t][STAGES[len(teams)]] += 1   # everyone reached the opening round
-    while len(teams) > 1:
-        nxt = []
-        for i in range(0, len(teams), 2):
-            a, b = teams[i], teams[i + 1]
-            nxt.append(a if random.random() < advance_prob(a, b) else b)
-        teams = nxt
-        for t in teams:
-            reached[t][STAGES[len(teams)]] += 1
-    return teams[0]
+# ---- 5. Simulate the bracket once, tracking how far each team gets ----
+def simulate_once(reached):
+    w = {}
+    for a, b in R32.values():
+        reached[a]['R32'] += 1; reached[b]['R32'] += 1   # all 32 reached R32
+    for m, (a, b) in R32.items():
+        w[m] = _play(a, b); reached[w[m]]['R16'] += 1     # R32 winners reach R16
+    for stage, matches in ROUNDS:
+        for m, (x, y) in matches.items():
+            w[m] = _play(w[x], w[y]); reached[w[m]][stage] += 1
+    return w[104]
 
 # ---- 5. Run it 10,000 times and tally champions + rounds reached ----
 random.seed(42)   # reproducible odds: same inputs -> same odds, only real results move them
@@ -601,7 +621,7 @@ N = 10_000
 titles = defaultdict(int)
 reached = defaultdict(lambda: defaultdict(int))   # team -> stage -> count
 for _ in range(N):
-    titles[simulate_once(bracket, reached)] += 1
+    titles[simulate_once(reached)] += 1
 
 print(f"\n===== CHAMPIONSHIP ODDS ({N:,} simulations) =====")
 ranked = sorted(titles.items(), key=lambda x: x[1], reverse=True)
