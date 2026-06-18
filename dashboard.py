@@ -91,33 +91,51 @@ def norm(name):
     return API_NAME_MAP.get(name, name).strip()
 
 
-@st.cache_data(ttl=60)   # refresh live data at most once a minute
-def fetch_live():
-    """Return {frozenset({home,away}): {status, home_score, away_score, utcDate}}."""
+import time
+
+@st.cache_data(ttl=300)   # cache good data 5 min -> far fewer API calls (avoids rate limits)
+def _fetch_live_cached():
+    """Fetch live scores, retrying transient drops. RAISES on hard failure so
+    the failure is NOT cached and the next page load retries."""
     key = get_api_key()
     if not key:
         return {'_error': 'no_key'}
+    last = None
+    for attempt in range(3):
+        try:
+            r = requests.get(
+                'https://api.football-data.org/v4/competitions/WC/matches',
+                headers={'X-Auth-Token': key}, timeout=15)
+            r.raise_for_status()
+            out = {}
+            for m in r.json().get('matches', []):
+                h = norm((m.get('homeTeam') or {}).get('name'))
+                a = norm((m.get('awayTeam') or {}).get('name'))
+                if not h or not a:
+                    continue
+                ft = (m.get('score') or {}).get('fullTime') or {}
+                out[frozenset((h, a))] = {
+                    'status': m.get('status'), 'home': h, 'away': a,
+                    'home_score': ft.get('home'), 'away_score': ft.get('away'),
+                    'utcDate': m.get('utcDate'),
+                }
+            return out
+        except Exception as e:
+            last = e
+            time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(last)   # not cached -> retried on next rerun
+
+def fetch_live():
+    """Serve fresh/cached live data; fall back to last-known on API failure."""
     try:
-        r = requests.get(
-            'https://api.football-data.org/v4/competitions/WC/matches',
-            headers={'X-Auth-Token': key}, timeout=10)
-        r.raise_for_status()
-        out = {}
-        for m in r.json().get('matches', []):
-            h = norm((m.get('homeTeam') or {}).get('name'))
-            a = norm((m.get('awayTeam') or {}).get('name'))
-            if not h or not a:
-                continue
-            ft = (m.get('score') or {}).get('fullTime') or {}
-            out[frozenset((h, a))] = {
-                'status': m.get('status'),
-                'home': h, 'away': a,
-                'home_score': ft.get('home'),
-                'away_score': ft.get('away'),
-                'utcDate': m.get('utcDate'),
-            }
-        return out
+        data = _fetch_live_cached()
+        if '_error' not in data:
+            st.session_state['_last_live'] = data
+        return data
     except Exception as e:
+        if st.session_state.get('_last_live'):          # API down -> show last-good scores
+            stale = dict(st.session_state['_last_live']); stale['_stale'] = str(e)
+            return stale
         return {'_error': str(e)}
 
 
