@@ -160,8 +160,8 @@ live = fetch_live()
 
 st.caption(f"Predictions generated {data['generated']}  ·  {data['n_sims']:,} simulations")
 
-tab_games, tab_champ, tab_runs, tab_groups = st.tabs(
-    ["📅 Game by Game", "🏆 Championship odds", "📈 Run to the final", "🗂️ Groups"]
+tab_games, tab_groups, tab_runs, tab_champ = st.tabs(
+    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds"]
 )
 
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
@@ -486,6 +486,9 @@ with tab_groups:
         with cols[i % 3]:
             st.markdown(f"### Group {g}")
             standings = pd.DataFrame(data['groups'][g])
+            # Table shows REAL standings: actual points, then GD, then goals-for
+            standings = standings.sort_values(
+                ['pts', 'gd', 'gf'], ascending=False).reset_index(drop=True)
 
             def _mark(r):
                 if r.get('clinched'):

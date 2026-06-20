@@ -432,8 +432,9 @@ def expected_points(home, away):
 # Actual points from 2026 WC group games already played (for a LIVE table:
 # played games count their real 3/1/0; unplayed games use expected points).
 actual_wc_pts = {}   # frozenset(home, away) -> {team: points}
-team_gd = defaultdict(int)   # actual goal difference (tiebreaker, played games only)
-team_gf = defaultdict(int)   # actual goals for (secondary tiebreaker)
+team_pts = defaultdict(int)  # actual points (PRIMARY standings sort)
+team_gd = defaultdict(int)   # actual goal difference (1st tiebreaker)
+team_gf = defaultdict(int)   # actual goals for (2nd tiebreaker)
 for r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
     h, a = r.home_team, r.away_team
     hs, as_ = int(r.home_score), int(r.away_score)
@@ -441,6 +442,7 @@ for r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026
     elif hs < as_: hp, ap = 0, 3
     else: hp, ap = 1, 1
     actual_wc_pts[frozenset((h, a))] = {h: hp, a: ap}
+    team_pts[h] += hp;      team_pts[a] += ap
     team_gd[h] += hs - as_; team_gd[a] += as_ - hs
     team_gf[h] += hs;       team_gf[a] += as_
 
@@ -467,7 +469,9 @@ for group_name, teams in groups.items():
 
     group_matches[group_name] = matches
 
-    # Rank by points, then actual goal difference, then actual goals for
+    # Bracket/odds rank by the model's PROJECTED final standings (xPts), with
+    # actual GD then goals-for breaking ties (matters once a group is complete).
+    # The Groups TABLE is re-sorted by actual points in the dashboard.
     standings = sorted(table.items(),
                        key=lambda kv: (kv[1], team_gd.get(kv[0], 0), team_gf.get(kv[0], 0)),
                        reverse=True)
@@ -987,7 +991,7 @@ export = {
     'groups': {
         g: [{'team': t, 'gp': int(_team_gp.get(t, 0)),
              'pts': int(_team_actual_pts.get(t, 0)),
-             'gd': int(team_gd.get(t, 0)),
+             'gd': int(team_gd.get(t, 0)), 'gf': int(team_gf.get(t, 0)),
              'xpts': round(float(p), 2), 'advances': i < 2,
              'clinched': t in _clinched}
             for i, (t, p) in enumerate(standings)]
