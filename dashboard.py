@@ -456,13 +456,27 @@ with tab_runs:
 
     st.subheader("Probability of reaching each stage")
     stages = ['R32', 'R16', 'QF', 'SF', 'Final', 'Champion']
-    rows = [{'Team': t, **{s: sd.get(s, 0) * 100 for s in stages}}
-            for t, sd in data['stage_odds'].items()]
-    df = pd.DataFrame(rows).sort_values('Champion', ascending=False)
-    st.dataframe(
-        df.style.format({s: '{:.0f}%' for s in stages}),
-        hide_index=True, use_container_width=True, height=600,
-    )
+    sidx = {s: i for i, s in enumerate(stages)}
+    prog = data.get('stage_progress', {})
+
+    def stage_cell(team, s, val):
+        p = prog.get(team)
+        if p:
+            r = p.get('reached')
+            if r is not None and sidx[s] <= sidx[r]:
+                return f'✅ {val * 100:.0f}%'
+            if p.get('eliminated') and (r is None or sidx[s] > sidx[r]):
+                return f'❌ {val * 100:.0f}%'
+        return f'{val * 100:.0f}%'
+
+    ordered = sorted(data['stage_odds'].items(),
+                     key=lambda kv: kv[1].get('Champion', 0), reverse=True)
+    rows = [{'Team': t, **{s: stage_cell(t, s, sd.get(s, 0)) for s in stages}}
+            for t, sd in ordered]
+    st.dataframe(pd.DataFrame(rows), hide_index=True,
+                 use_container_width=True, height=600)
+    st.caption("✅ reached (confirmed) · ❌ eliminated · otherwise model probability. "
+               "R32 % is the projected field until a team clinches.")
 
 # ===== TAB: Groups =====
 with tab_groups:
@@ -472,12 +486,21 @@ with tab_groups:
         with cols[i % 3]:
             st.markdown(f"### Group {g}")
             standings = pd.DataFrame(data['groups'][g])
-            standings['team'] = standings.apply(
-                lambda r: f"✅ {r['team']}" if r['advances'] else f"　 {r['team']}", axis=1)
+
+            def _mark(r):
+                if r.get('clinched'):
+                    return f"✅ {r['team']}"       # mathematically into the R32
+                if r['advances']:
+                    return f"▲ {r['team']}"        # projected to advance
+                return f"　 {r['team']}"
+            standings['team'] = standings.apply(_mark, axis=1)
             st.dataframe(
-                standings[['team', 'xpts']].rename(columns={'team': 'Team', 'xpts': 'xPts'}),
+                standings[['team', 'gp', 'pts', 'gd', 'xpts']].rename(
+                    columns={'team': 'Team', 'gp': 'GP', 'pts': 'Points',
+                             'gd': 'GD', 'xpts': 'xPts'}),
                 hide_index=True, use_container_width=True,
             )
+            st.caption("✅ qualified (clinched) · ▲ projected to advance")
             with st.expander("Match predictions"):
                 for m in data['group_matches'][g]:
                     st.write(f"**{m['home']}** {m['p_home']:.0%} · "

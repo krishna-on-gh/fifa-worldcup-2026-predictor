@@ -432,12 +432,17 @@ def expected_points(home, away):
 # Actual points from 2026 WC group games already played (for a LIVE table:
 # played games count their real 3/1/0; unplayed games use expected points).
 actual_wc_pts = {}   # frozenset(home, away) -> {team: points}
+team_gd = defaultdict(int)   # actual goal difference (tiebreaker, played games only)
+team_gf = defaultdict(int)   # actual goals for (secondary tiebreaker)
 for r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
     h, a = r.home_team, r.away_team
-    if r.home_score > r.away_score: hp, ap = 3, 0
-    elif r.home_score < r.away_score: hp, ap = 0, 3
+    hs, as_ = int(r.home_score), int(r.away_score)
+    if hs > as_: hp, ap = 3, 0
+    elif hs < as_: hp, ap = 0, 3
     else: hp, ap = 1, 1
     actual_wc_pts[frozenset((h, a))] = {h: hp, a: ap}
+    team_gd[h] += hs - as_; team_gd[a] += as_ - hs
+    team_gf[h] += hs;       team_gf[a] += as_
 
 group_standings = {}   # group_name -> ordered list of (team, xPts)
 group_matches = {}     # group_name -> list of (home, away, p_home, p_draw, p_away)
@@ -462,8 +467,10 @@ for group_name, teams in groups.items():
 
     group_matches[group_name] = matches
 
-    # Rank by expected points
-    standings = sorted(table.items(), key=lambda x: x[1], reverse=True)
+    # Rank by points, then actual goal difference, then actual goals for
+    standings = sorted(table.items(),
+                       key=lambda kv: (kv[1], team_gd.get(kv[0], 0), team_gf.get(kv[0], 0)),
+                       reverse=True)
     group_standings[group_name] = standings
     print(f"  --- Predicted standings ---")
     for rank, (team, pts) in enumerate(standings, 1):
@@ -544,8 +551,11 @@ import random
 winner = {g: s[0][0] for g, s in group_standings.items()}
 runner = {g: s[1][0] for g, s in group_standings.items()}
 third  = {g: s[2] for g, s in group_standings.items()}     # (team, pts)
-# The 8 best third-place teams (by points) advance.
-best_third_groups = [g for g, _ in sorted(third.items(), key=lambda kv: kv[1][1], reverse=True)[:8]]
+# The 8 best third-place teams advance (points, then actual GD, then goals for).
+best_third_groups = [g for g, _ in sorted(
+    third.items(),
+    key=lambda kv: (kv[1][1], team_gd.get(kv[1][0], 0), team_gf.get(kv[1][0], 0)),
+    reverse=True)[:8]]
 print(f"\nQualifiers: 32 (12 winners, 12 runners-up, 8 best thirds)")
 
 # ---- 2. Assign the 8 best thirds to their allowed R32 slots (official FIFA structure) ----
@@ -603,16 +613,43 @@ ROUNDS = [
     ('Champion', {104: (101, 102)}),
 ]
 
-# ---- 5. Simulate the bracket once, tracking how far each team gets ----
+# ---- 5. Condition on REAL knockout results: a played KO game is a fact, not
+#         re-simulated. Eliminated teams fall to 0; everyone else recomputes. ----
+_ko_lookup = {}
+for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
+    _ko_lookup[frozenset((_r.home_team, _r.away_team))] = (
+        _r.home_team, _r.away_team, _r.home_score, _r.away_score)
+def _ko_win(a, b):
+    if not a or not b:
+        return None
+    g = _ko_lookup.get(frozenset((a, b)))
+    if not g or g[2] == g[3]:        # not played, or draw (penalties unknown)
+        return None
+    return g[0] if g[2] > g[3] else g[1]
+FORCED = {}           # match id -> real winner (forced into every simulation)
+_fk = {}
+for _m, (_a, _b) in R32.items():
+    _fk[_m] = _ko_win(_a, _b)
+    if _fk[_m]:
+        FORCED[_m] = _fk[_m]
+for _stage, _ms in ROUNDS:
+    for _m, (_x, _y) in _ms.items():
+        _fk[_m] = _ko_win(_fk.get(_x), _fk.get(_y))
+        if _fk[_m]:
+            FORCED[_m] = _fk[_m]
+
+# ---- Simulate the bracket once, tracking how far each team gets ----
 def simulate_once(reached):
     w = {}
     for a, b in R32.values():
         reached[a]['R32'] += 1; reached[b]['R32'] += 1   # all 32 reached R32
     for m, (a, b) in R32.items():
-        w[m] = _play(a, b); reached[w[m]]['R16'] += 1     # R32 winners reach R16
+        w[m] = FORCED[m] if m in FORCED else _play(a, b)
+        reached[w[m]]['R16'] += 1                          # R32 winners reach R16
     for stage, matches in ROUNDS:
         for m, (x, y) in matches.items():
-            w[m] = _play(w[x], w[y]); reached[w[m]][stage] += 1
+            w[m] = FORCED[m] if m in FORCED else _play(w[x], w[y])
+            reached[w[m]][stage] += 1
     return w[104]
 
 # ---- 5. Run it 10,000 times and tally champions + rounds reached ----
@@ -809,8 +846,44 @@ _team_group = {t: g for g, ts in groups.items() for t in ts}
 _group_done = {g: sum(1 for pr in combinations(ts, 2)
                       if frozenset(pr) in actual_wc_pts) == 6
                for g, ts in groups.items()}
+
+# Teams mathematically guaranteed a top-2 finish (so: guaranteed into the R32),
+# found by enumerating every outcome of that group's remaining games. Ties are
+# assumed to break AGAINST the team, so this never flags a false clinch.
+from itertools import product
+def _clinched_top2(group_teams):
+    base = {t: 0 for t in group_teams}
+    remaining = []
+    for h, a in combinations(group_teams, 2):
+        pair = frozenset((h, a))
+        if pair in actual_wc_pts:
+            base[h] += actual_wc_pts[pair][h]
+            base[a] += actual_wc_pts[pair][a]
+        else:
+            remaining.append((h, a))
+    clinched = set()
+    for t in group_teams:
+        safe = True
+        for combo in product((0, 1, 2), repeat=len(remaining)):   # 0=home,1=draw,2=away
+            pts = dict(base)
+            for (h, a), o in zip(remaining, combo):
+                if o == 0: pts[h] += 3
+                elif o == 2: pts[a] += 3
+                else: pts[h] += 1; pts[a] += 1
+            above = sum(1 for x in group_teams if x != t and pts[x] >= pts[t])
+            if above >= 2:           # some scenario drops t to 3rd or worse
+                safe = False
+                break
+        if safe:
+            clinched.add(t)
+    return clinched
+
+_clinched = set()
+for _g, _ts in groups.items():
+    _clinched |= _clinched_top2(_ts)
+
 def _confirmed(t):
-    return bool(t) and _group_done.get(_team_group.get(t), False)
+    return bool(t) and (t in _clinched or _group_done.get(_team_group.get(t), False))
 
 _res_lookup = {}   # frozenset(pair) -> (home, away, home_score, away_score)
 for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
@@ -862,12 +935,61 @@ bracket = {
     'parent': {str(c): p for c, p in _parent.items()},
 }
 
+# Actual points + games played so far (from played 2026 WC games)
+_team_actual_pts = defaultdict(int)
+_team_gp = defaultdict(int)
+for _pair, _d in actual_wc_pts.items():
+    for _t, _p in _d.items():
+        _team_actual_pts[_t] += _p
+        _team_gp[_t] += 1
+
+# Per-team ACTUAL progress (facts) for the stage table: furthest round reached
+# and whether the team is eliminated. Drives the ✅ / ❌ marks in the dashboard.
+_stage_idx = {s: i for i, s in enumerate(STAGE_ORDER)}
+_stage_of_winner = {m: 'R16' for m in R32}        # winning an R32 match reaches R16
+for _stage, _ms in ROUNDS:
+    for _m in _ms:
+        _stage_of_winner[_m] = _stage
+_all_teams = set(_team_group)
+_r32_field = set()
+for _a, _b in R32.values():
+    _r32_field |= {_a, _b}
+_all_groups_done = all(_group_done.values())
+_reached, _elim = {}, set()
+def _bump(team, stage):
+    if team and (_reached.get(team) is None
+                 or _stage_idx[stage] > _stage_idx[_reached[team]]):
+        _reached[team] = stage
+for _t in _all_teams:                              # reached R32: clinched, or field final
+    if _t in _clinched or (_all_groups_done and _t in _r32_field):
+        _bump(_t, 'R32')
+if _all_groups_done:
+    _elim |= (_all_teams - _r32_field)
+_actual_entrants = {_m: (R32[_m][0], R32[_m][1]) for _m in R32}
+for _stage, _ms in ROUNDS:
+    for _m, (_x, _y) in _ms.items():
+        _actual_entrants[_m] = (_bk_winners.get(_x), _bk_winners.get(_y))
+for _m, (_a, _b) in _actual_entrants.items():
+    _w = _bk_winners.get(_m)
+    if not _w:
+        continue
+    _st = _stage_of_winner[_m]
+    _bump(_w, _st)                                  # winner reached this round
+    _loser = _b if _w == _a else _a
+    if _loser:
+        _elim.add(_loser)                          # loser eliminated here
+        _bump(_loser, STAGE_ORDER[_stage_idx[_st] - 1])
+
 export = {
     'generated': str(pd.Timestamp.now()),
     'n_sims': N,
     # Group tables: group -> [{team, xpts, advances}]
     'groups': {
-        g: [{'team': t, 'xpts': round(float(p), 2), 'advances': i < 2}
+        g: [{'team': t, 'gp': int(_team_gp.get(t, 0)),
+             'pts': int(_team_actual_pts.get(t, 0)),
+             'gd': int(team_gd.get(t, 0)),
+             'xpts': round(float(p), 2), 'advances': i < 2,
+             'clinched': t in _clinched}
             for i, (t, p) in enumerate(standings)]
         for g, standings in group_standings.items()
     },
@@ -887,6 +1009,9 @@ export = {
         for t in reached
     },
     'bracket': bracket,
+    # Per-team facts: furthest round actually reached + whether eliminated
+    'stage_progress': {t: {'reached': _reached.get(t), 'eliminated': t in _elim}
+                       for t in _all_teams},
 }
 
 with open('predictions.json', 'w', encoding='utf-8') as f:
