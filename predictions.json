@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-20 01:17:20.029576",
+  "generated": "2026-06-20 02:08:50.461137",
   "n_sims": 10000,
   "groups": {
     "A": [
@@ -1183,6 +1183,232 @@
       "SF": 0.031,
       "Final": 0.0075,
       "Champion": 0.0016
+    }
+  },
+  "bracket": {
+    "r32_order": [
+      74,
+      77,
+      73,
+      75,
+      83,
+      84,
+      81,
+      82,
+      76,
+      78,
+      79,
+      80,
+      86,
+      88,
+      85,
+      87
+    ],
+    "r32": {
+      "74": {
+        "a": "Germany",
+        "b": "Scotland",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "77": {
+        "a": "France",
+        "b": "Australia",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "73": {
+        "a": "South Korea",
+        "b": "Switzerland",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "75": {
+        "a": "Netherlands",
+        "b": "Brazil",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "83": {
+        "a": "Portugal",
+        "b": "Croatia",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "84": {
+        "a": "Spain",
+        "b": "Austria",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "81": {
+        "a": "United States",
+        "b": "Japan",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "82": {
+        "a": "Belgium",
+        "b": "Senegal",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "76": {
+        "a": "Morocco",
+        "b": "Sweden",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "78": {
+        "a": "Ivory Coast",
+        "b": "Norway",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "79": {
+        "a": "Mexico",
+        "b": "Ecuador",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "80": {
+        "a": "England",
+        "b": "Algeria",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "86": {
+        "a": "Argentina",
+        "b": "Uruguay",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "88": {
+        "a": "Paraguay",
+        "b": "Egypt",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "85": {
+        "a": "Canada",
+        "b": "Iran",
+        "a_conf": false,
+        "b_conf": false
+      },
+      "87": {
+        "a": "Colombia",
+        "b": "Ghana",
+        "a_conf": false,
+        "b_conf": false
+      }
+    },
+    "columns": [
+      [
+        74,
+        77,
+        73,
+        75,
+        83,
+        84,
+        81,
+        82,
+        76,
+        78,
+        79,
+        80,
+        86,
+        88,
+        85,
+        87
+      ],
+      [
+        89,
+        90,
+        93,
+        94,
+        91,
+        92,
+        95,
+        96
+      ],
+      [
+        97,
+        98,
+        99,
+        100
+      ],
+      [
+        101,
+        102
+      ],
+      [
+        104
+      ]
+    ],
+    "winners": {
+      "73": null,
+      "74": null,
+      "75": null,
+      "76": null,
+      "77": null,
+      "78": null,
+      "79": null,
+      "80": null,
+      "81": null,
+      "82": null,
+      "83": null,
+      "84": null,
+      "85": null,
+      "86": null,
+      "87": null,
+      "88": null,
+      "89": null,
+      "90": null,
+      "91": null,
+      "92": null,
+      "93": null,
+      "94": null,
+      "95": null,
+      "96": null,
+      "97": null,
+      "98": null,
+      "99": null,
+      "100": null,
+      "101": null,
+      "102": null,
+      "104": null
+    },
+    "parent": {
+      "74": 89,
+      "77": 89,
+      "73": 90,
+      "75": 90,
+      "76": 91,
+      "78": 91,
+      "79": 92,
+      "80": 92,
+      "83": 93,
+      "84": 93,
+      "81": 94,
+      "82": 94,
+      "86": 95,
+      "88": 95,
+      "85": 96,
+      "87": 96,
+      "89": 97,
+      "90": 97,
+      "93": 98,
+      "94": 98,
+      "91": 99,
+      "92": 99,
+      "95": 100,
+      "96": 100,
+      "97": 101,
+      "98": 101,
+      "99": 102,
+      "100": 102,
+      "101": 104,
+      "102": 104
     }
   }
 }

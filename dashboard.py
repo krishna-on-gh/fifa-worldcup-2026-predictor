@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 ET = ZoneInfo('America/New_York')   # fixture times are entered in US Eastern (EST/EDT auto)
 
@@ -313,7 +314,146 @@ with tab_champ:
     )
 
 # ===== TAB: Stage progression =====
+def build_bracket_html(bk, stage_odds):
+    """Left-to-right knockout bracket that fills as real results come in.
+    Confirmed qualifiers are solid, projections faded/italic, future slots TBD.
+    Hover a team to light up its route to the final and show its stage odds."""
+    import html as _html
+    import json as _json
+    winners = bk['winners']
+    r32, order = bk['r32'], bk['r32_order']
+
+    col0 = []          # (team, state, r32_match_id)
+    for m in order:
+        e, w = r32[str(m)], winners.get(str(m))
+        for side in ('a', 'b'):
+            t, conf = e[side], e[side + '_conf']
+            if w and t != w:
+                state = 'elim'
+            elif w or conf:
+                state = 'won'
+            else:
+                state = 'proj'
+            col0.append((t, state, m))
+
+    # later columns: each cell is the WINNER of a match id -> carries data-slot=id
+    labels = ['Round of 16', 'Quarterfinals', 'Semifinals', 'Final', 'Champion']
+    win_cols = []      # (header, [(team, state, match_id)])
+    for idx, ids in enumerate(bk['columns']):
+        champ = idx == len(bk['columns']) - 1
+        cells = [(winners.get(str(m)), 'champ' if champ else ('won' if winners.get(str(m)) else 'tbd'), m)
+                 for m in ids]
+        win_cols.append((labels[idx], cells))
+
+    def cell_html(team, state, slot, entrant=False):
+        label = _html.escape(team) if team else 'TBD'
+        attrs = f' data-{"eslot" if entrant else "slot"}="{slot}"'
+        if team:
+            attrs += f' data-team="{_html.escape(team)}" title="{_html.escape(team)}"'
+        prefix = '★ ' if state == 'champ' else ''
+        return f'<div class="bk-cell bk-{state}"{attrs}>{prefix}{label}</div>'
+
+    cols_html = '<div class="bk-col"><div class="bk-h">Round of 32</div><div class="bk-col-inner">'
+    cols_html += ''.join(cell_html(t, s, m, entrant=True) for t, s, m in col0)
+    cols_html += '</div></div>'
+    for header, cells in win_cols:
+        inner = ''.join(cell_html(t, s, m) for t, s, m in cells)
+        cols_html += (f'<div class="bk-col"><div class="bk-h">{header}</div>'
+                      f'<div class="bk-col-inner">{inner}</div></div>')
+
+    parent_js = _json.dumps(bk.get('parent', {}))
+    odds_js = _json.dumps(stage_odds)
+    return f"""<div class="bk-wrap">
+<div class="bk-tip" id="bk-tip"></div>
+<div class="bk-legend">
+  <span><span class="lg bk-won">won</span> qualified / won</span>
+  <span><span class="lg bk-proj">proj</span> model projection</span>
+  <span><span class="lg bk-tbd">TBD</span> awaiting result</span>
+  <span style="margin-left:auto;font-style:italic">hover a team for its route &amp; odds</span>
+</div>
+<div class="bk-cols">{cols_html}</div></div>
+<style>
+.bk-wrap{{position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11.5px}}
+.bk-tip{{position:absolute;z-index:5;display:none;background:#1c1917;color:#fafaf9;border:1px solid #44403c;padding:5px 9px;border-radius:6px;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}}
+.bk-tip b{{font-weight:500}}
+.bk-legend{{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;color:#78716c}}
+.bk-legend .lg{{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10.5px;border:1px solid transparent;margin-right:3px;vertical-align:middle}}
+.bk-cols{{display:flex;align-items:stretch}}
+.bk-col{{display:flex;flex-direction:column;flex:1;min-width:90px;padding:0 3px}}
+.bk-h{{text-align:center;font-weight:500;margin-bottom:6px;color:#78716c}}
+.bk-col-inner{{display:flex;flex-direction:column;justify-content:space-around;flex:1}}
+.bk-cell{{height:20px;line-height:18px;padding:0 7px;margin:2px 0;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid transparent}}
+.bk-won{{background:#f5f5f4;border-color:#d6d3cd;color:#1c1917;cursor:pointer}}
+.bk-proj{{border:1px dashed #cfcabf;color:#78716c;font-style:italic;cursor:pointer}}
+.bk-tbd{{border:1px dashed #e0ddd5;color:#a8a29e}}
+.bk-elim{{color:#bcb8af;text-decoration:line-through}}
+.bk-champ{{border:1px solid #d4960a;color:#b45309;text-align:center;font-weight:500}}
+.bk-hl{{box-shadow:0 0 0 2px #2563eb;background:rgba(37,99,235,.12)}}
+.bk-route{{box-shadow:0 0 0 2px #2563eb}}
+@media (prefers-color-scheme:dark){{
+ .bk-legend,.bk-h{{color:#a8a29e}}
+ .bk-won{{background:#292524;border-color:#57534e;color:#e7e5e4}}
+ .bk-proj{{border-color:#57534e;color:#a8a29e}}
+ .bk-tbd{{border-color:#44403c;color:#78716c}}
+ .bk-elim{{color:#57534e}}
+ .bk-champ{{border-color:#f59e0b;color:#fbbf24}}
+ .bk-hl{{box-shadow:0 0 0 2px #3b82f6;background:rgba(59,130,246,.16)}}
+ .bk-route{{box-shadow:0 0 0 2px #3b82f6}}
+}}
+</style>
+<script>
+(function(){{
+var PARENT={parent_js}, ODDS={odds_js};
+var wrap=document.querySelector('.bk-wrap');
+var tip=document.getElementById('bk-tip');
+var cells=document.querySelectorAll('.bk-cell');
+function pct(v){{return Math.round((v||0)*100)+'%';}}
+function routeFrom(slot){{var c=[String(slot)];while(PARENT[slot]!=null){{slot=PARENT[slot];c.push(String(slot));}}return c;}}
+function clearAll(){{cells.forEach(function(x){{x.classList.remove('bk-hl');x.classList.remove('bk-route');}});tip.style.display='none';}}
+cells.forEach(function(el){{
+ el.addEventListener('mouseenter',function(){{
+  clearAll();
+  el.classList.add('bk-hl');
+  var start=el.getAttribute('data-eslot')||el.getAttribute('data-slot');
+  if(start!=null){{
+   routeFrom(start).forEach(function(s){{
+    var w=document.querySelector('.bk-cell[data-slot="'+s+'"]');
+    if(w&&w!==el) w.classList.add('bk-route');
+   }});
+  }}
+  var team=el.getAttribute('data-team');
+  if(team&&ODDS[team]){{
+   var o=ODDS[team];
+   tip.innerHTML='<b>'+team+'</b>&nbsp; R16 '+pct(o.R16)+' &middot; QF '+pct(o.QF)+
+     ' &middot; SF '+pct(o.SF)+' &middot; Final '+pct(o.Final)+' &middot; win '+pct(o.Champion);
+   tip.style.display='block';
+   var top=el.offsetTop-tip.offsetHeight-6;
+   if(top<0) top=el.offsetTop+el.offsetHeight+6;
+   var left=el.offsetLeft+el.offsetWidth/2-tip.offsetWidth/2;
+   var maxL=wrap.clientWidth-tip.offsetWidth-4;
+   if(left<4) left=4;
+   if(maxL>4&&left>maxL) left=maxL;
+   tip.style.top=top+'px'; tip.style.left=left+'px';
+  }}
+ }});
+ el.addEventListener('mouseleave',clearAll);
+}});
+}})();
+</script>"""
+
+
 with tab_runs:
+    st.subheader("Run to the final")
+    bk = data.get('bracket')
+    if bk:
+        bracket_h = len(bk['r32_order']) * 2 * 26 + 130
+        components.html(build_bracket_html(bk, data['stage_odds']),
+                        height=bracket_h, scrolling=False)
+        st.caption("Solid = qualified or won · faded italic = model projection (firms up "
+                   "as groups finish) · TBD fills in as knockout results come in.")
+    else:
+        st.info("Bracket not available yet — re-run predictor.py to generate it.")
+
     st.subheader("Probability of reaching each stage")
     stages = ['R32', 'R16', 'QF', 'SF', 'Final', 'Champion']
     rows = [{'Team': t, **{s: sd.get(s, 0) * 100 for s in stages}}

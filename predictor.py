@@ -801,6 +801,67 @@ def _gm_entry(h, a, ph, pd_, pa):
             'p_home': round(float(ph), 3), 'p_draw': round(float(pd_), 3),
             'p_away': round(float(pa), 3)}
 
+# ---- Bracket export: tree structure + R32 confirmed flags + real KO winners ----
+# A team's R32 slot is "confirmed" once its group's 6 games are all played
+# (until then it's the model's projection). Knockout winners come from actual
+# results — blank until a match is really played (penalty draws stay blank).
+_team_group = {t: g for g, ts in groups.items() for t in ts}
+_group_done = {g: sum(1 for pr in combinations(ts, 2)
+                      if frozenset(pr) in actual_wc_pts) == 6
+               for g, ts in groups.items()}
+def _confirmed(t):
+    return bool(t) and _group_done.get(_team_group.get(t), False)
+
+_res_lookup = {}   # frozenset(pair) -> (home, away, home_score, away_score)
+for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
+    _res_lookup[frozenset((_r.home_team, _r.away_team))] = (
+        _r.home_team, _r.away_team, _r.home_score, _r.away_score)
+def _real_winner(a, b):
+    if not a or not b:
+        return None
+    g = _res_lookup.get(frozenset((a, b)))
+    if not g or g[2] == g[3]:        # not played, or draw (penalties unknown)
+        return None
+    return g[0] if g[2] > g[3] else g[1]
+
+_feeders = {}
+_parent = {}                       # match id -> match its winner advances into
+for _stage, _ms in ROUNDS:
+    _feeders.update(_ms)
+    for _m, (_x, _y) in _ms.items():
+        _parent[_x] = _m
+        _parent[_y] = _m
+def _leaf_order(m):
+    if m in R32:
+        return [m]
+    x, y = _feeders[m]
+    return _leaf_order(x) + _leaf_order(y)
+_r32_order = _leaf_order(104)
+
+_bk_winners = {}
+for _m, (_a, _b) in R32.items():
+    _bk_winners[_m] = _real_winner(_a, _b)
+for _stage, _ms in ROUNDS:
+    for _m, (_x, _y) in _ms.items():
+        _bk_winners[_m] = _real_winner(_bk_winners.get(_x), _bk_winners.get(_y))
+
+bracket = {
+    'r32_order': _r32_order,
+    'r32': {str(m): {'a': R32[m][0], 'b': R32[m][1],
+                     'a_conf': _confirmed(R32[m][0]), 'b_conf': _confirmed(R32[m][1])}
+            for m in _r32_order},
+    # each column holds the match ids whose WINNERS fill that round
+    'columns': [
+        _r32_order,                          # winners -> Round of 16
+        [89, 90, 93, 94, 91, 92, 95, 96],    # winners -> Quarterfinals
+        [97, 98, 99, 100],                   # winners -> Semifinals
+        [101, 102],                          # winners -> Final
+        [104],                               # winner  -> Champion
+    ],
+    'winners': {str(m): w for m, w in _bk_winners.items()},
+    'parent': {str(c): p for c, p in _parent.items()},
+}
+
 export = {
     'generated': str(pd.Timestamp.now()),
     'n_sims': N,
@@ -825,6 +886,7 @@ export = {
         t: {s: round(float(reached[t].get(s, 0)) / N, 4) for s in STAGE_ORDER}
         for t in reached
     },
+    'bracket': bracket,
 }
 
 with open('predictions.json', 'w', encoding='utf-8') as f:
