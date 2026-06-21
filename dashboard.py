@@ -508,3 +508,24 @@ with tab_groups:
                 for m in data['group_matches'][g]:
                     st.write(f"**{m['home']}** {m['p_home']:.0%} · "
                              f"draw {m['p_draw']:.0%} · {m['p_away']:.0%} **{m['away']}**")
+
+    # ----- Third-place race: the 8 best thirds reach the R32 -----
+    st.divider()
+    st.subheader("Third-place teams — best 8 advance")
+    thirds = []
+    for g in sorted(data['groups']):
+        t = data['groups'][g][2]        # projected 3rd (group list is xPts-ordered)
+        thirds.append({'Group': g, 'Team': t['team'], 'GP': t['gp'],
+                       'Points': t['pts'], 'GD': t['gd'], 'xPts': t['xpts'],
+                       '_gf': t['gf']})
+    thirds.sort(key=lambda r: (r['xPts'], r['GD'], r['_gf']), reverse=True)
+    for i, r in enumerate(thirds):
+        r['Team'] = f"✅ {r['Team']}" if i < 8 else f"❌ {r['Team']}"
+        del r['_gf']
+    st.dataframe(
+        pd.DataFrame(thirds)[['Group', 'Team', 'GP', 'Points', 'GD', 'xPts']],
+        hide_index=True, use_container_width=True, height=460,
+    )
+    st.caption("The 8 best third-place teams reach the R32, ranked by xPts → GD → "
+               "goals for. ✅ projected in · ❌ projected out. Re-ranks every refresh "
+               "as standings (and who holds each group's 3rd slot) change.")
