@@ -431,17 +431,24 @@ def expected_points(home, away):
 
 # Actual points from 2026 WC group games already played (for a LIVE table:
 # played games count their real 3/1/0; unplayed games use expected points).
-actual_wc_pts = {}   # frozenset(home, away) -> {team: points}
+# Group-stage stats ONLY: restrict to the 72 group-round pairings (12 groups x 6),
+# first occurrence per pairing. This keeps Points/GP/GD/xPts frozen once a team has
+# played its 3 group games — knockout results never leak into the group standings.
+_group_pairs = {frozenset(p) for ts in groups.values() for p in combinations(ts, 2)}
+actual_wc_pts = {}   # frozenset(home, away) -> {team: points}  (group games only)
 team_pts = defaultdict(int)  # actual points (PRIMARY standings sort)
 team_gd = defaultdict(int)   # actual goal difference (1st tiebreaker)
 team_gf = defaultdict(int)   # actual goals for (2nd tiebreaker)
 for r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
+    pair = frozenset((r.home_team, r.away_team))
+    if pair not in _group_pairs or pair in actual_wc_pts:
+        continue             # knockout game (or same-group rematch) — not group stats
     h, a = r.home_team, r.away_team
     hs, as_ = int(r.home_score), int(r.away_score)
     if hs > as_: hp, ap = 3, 0
     elif hs < as_: hp, ap = 0, 3
     else: hp, ap = 1, 1
-    actual_wc_pts[frozenset((h, a))] = {h: hp, a: ap}
+    actual_wc_pts[pair] = {h: hp, a: ap}
     team_pts[h] += hp;      team_pts[a] += ap
     team_gd[h] += hs - as_; team_gd[a] += as_ - hs
     team_gf[h] += hs;       team_gf[a] += as_
