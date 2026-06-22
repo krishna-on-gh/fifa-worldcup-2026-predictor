@@ -556,5 +556,6 @@ I built this as a learning project and used AI (Claude Opus 4.8 model) as a prog
 The goal of this model is to try and predict outcomes, not specific scores (so the probability of a team winning doesn't necessarily correspond with the actual end score), and the Round of 32 field is currently a projection rather than a full group-stage simulation. That being said, I still have ideas for improvements on the horizon, so stay tuned!
 
 Built by Krishna Vankayala - [GitHub repo](https://github.com/krishna-on-gh/fifa-worldcup-2026-predictor)
+
 AI Assistance from: Claude Opus 4.8 (Anthropic)
     """)
