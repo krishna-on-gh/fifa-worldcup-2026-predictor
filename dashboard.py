@@ -142,6 +142,12 @@ def fetch_live():
 
 # =====================================================================
 st.set_page_config(page_title="2026 FIFA World Cup Predictor Dashboard", page_icon="⚽", layout="wide")
+st.markdown("""
+<style>
+  .block-container { padding-top: 2.5rem; }
+  h1 { margin-bottom: 0.25rem; padding-bottom: 0; }
+</style>
+""", unsafe_allow_html=True)
 st.title("⚽ FIFA World Cup 2026 — Real Time Calibrated Prediction Dashboard")
 
 data, src = load_json('predictions.json')
