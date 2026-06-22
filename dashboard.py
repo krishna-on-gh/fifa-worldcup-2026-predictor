@@ -158,7 +158,7 @@ for g, matches in data['group_matches'].items():
 fixtures = load_fixtures()
 live = fetch_live()
 
-st.caption(f"Predictions generated {data['generated']}  ·  {data['n_sims']:,} simulations")
+st.caption(f"Odds from {data['n_sims']:,} Monte Carlo simulations")
 
 tab_games, tab_groups, tab_runs, tab_champ = st.tabs(
     ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds"]
