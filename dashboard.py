@@ -148,8 +148,10 @@ st.markdown("""
   h1 { margin-bottom: 0.25rem; padding-bottom: 0; }
 </style>
 """, unsafe_allow_html=True)
-st.title("⚽ FIFA World Cup 2026 — Real Time Calibrated Prediction Dashboard")
-
+st.markdown(
+    '<h1 style="margin:0; padding:0;">⚽ FIFA World Cup 2026 — Real Time Calibrated Prediction Dashboard</h1>',
+    unsafe_allow_html=True,
+)
 data, src = load_json('predictions.json')
 if data is None:
     st.error("Could not find predictions.json. Run `python predictor.py` first.")
