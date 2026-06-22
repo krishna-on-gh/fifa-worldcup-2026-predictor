@@ -141,8 +141,8 @@ def fetch_live():
 
 
 # =====================================================================
-st.set_page_config(page_title="World Cup 2026 Predictor", page_icon="⚽", layout="wide")
-st.title("⚽ World Cup 2026 — Prediction Dashboard")
+st.set_page_config(page_title="2026 FIFA World Cup Predictor Dashboard", page_icon="⚽", layout="wide")
+st.title("⚽ FIFA World Cup 2026 — Real Time Calibrated Prediction Dashboard")
 
 data, src = load_json('predictions.json')
 if data is None:
@@ -160,8 +160,8 @@ live = fetch_live()
 
 st.caption(f"Odds from {data['n_sims']:,} Monte Carlo simulations")
 
-tab_games, tab_groups, tab_runs, tab_champ = st.tabs(
-    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds"]
+tab_games, tab_groups, tab_runs, tab_champ, tab_about = st.tabs(
+    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds", "About/Methodology"]
 )
 
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
@@ -529,3 +529,32 @@ with tab_groups:
     st.caption("The 8 best third-place teams reach the R32, ranked by xPts → GD → "
                "goals for. ✅ projected in · ❌ projected out. Re-ranks every refresh "
                "as standings (and who holds each group's 3rd slot) change.")
+
+# ===== TAB: About =====
+with tab_about:
+    st.subheader("About this project")
+    st.markdown("""
+The goal of this dashboard is to predict the 2026 FIFA World Cup using a machine-learning model
+I conceptualized and built from scratch, utilizing the help of AI, which then simulates the whole tournament thousands of times using the Monte Carlo simulations method.
+
+**How it works**
+- The concept of **team strength** is measured using Elo ratings, the team's recent form in games, as well as the team's squad quality (based on data regarding player performance for the top 23 players in the team).
+- An **XGBoost** classifier turns those into win/draw/loss probabilities for each match, which I then calibrate! This means that when the model says 75%, the outcomes should really happen 75% of the time!
+- A **Monte Carlo simulation** then plays the knockout bracket 10,000 times to produce championship and stage-by-stage odds. For instance, if a team wins a simulation 1,000 times against 10,000 total, it has a 10% probability for that scenario.
+- It pulls live scores using football data api (football-data.org), grades each prediction against the real result, flags teams the moment they've mathematically clinched advancement to the next round, and re-computes odds as games finish.
+
+**How good is it?**
+**60% accuracy** so far on three-way (win/draw/loss) outcomes — vs 33% in theoretical probability for random guessing. It's shown live on the Game-by-Game tab and validated with leak-free backtesting on past World Cups (the model never sees the future).
+
+**Skills I used in order to make this project possible**
+Python · XGBoost · scikit-learn · pandas library · Streamlit (for dashboard) · football-data.org API (for live scores)
+
+**AI-use disclosure!**
+I built this as a learning project and used AI (Claude Opus 4.8 model) as a programming partner and teacher. Claude wrote most of this code, but only under my direction and vision. I specified what I had in mind, what each feature should do, as well as reviewing and testing the output, making sure I understood every change that was being made so that I could explain, debug, and extend the model. Beyond this model, Claude helped me by explaining ML concepts and pressure-testing ideas. With that being said, every modeling decision was mine to make and verify: I designed the approach, ran the backtests (with the AI's assistance for large scale backtests consisting of hundreds of games), and cut changes that didn't hold up (including a newer dataset that backtested worse results for this model). I utilized AI to speed up the build and teach me new concepts, the judgment and final decision was all mine.
+
+**Known limitations**
+The goal of this model is to try and predict outcomes, not specific scores (so the probability of a team winning doesn't necessarily correspond with the actual end score), and the Round of 32 field is currently a projection rather than a full group-stage simulation. That being said, I still have ideas for improvements on the horizon, so stay tuned!
+
+Built by Krishna Vankayala - [GitHub repo](https://github.com/krishna-on-gh/fifa-worldcup-2026-predictor)
+AI Assistance from: Claude Opus 4.8 (Anthropic)
+    """)
