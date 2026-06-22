@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-21 20:51:15.302142",
+  "generated": "2026-06-22 00:16:25.533508",
   "n_sims": 10000,
   "groups": {
     "A": [
@@ -256,22 +256,22 @@
     ],
     "G": [
       {
+        "team": "Egypt",
+        "gp": 2,
+        "pts": 4,
+        "gd": 2,
+        "gf": 4,
+        "xpts": 5.15,
+        "advances": true,
+        "clinched": false
+      },
+      {
         "team": "Belgium",
         "gp": 2,
         "pts": 2,
         "gd": 0,
         "gf": 1,
-        "xpts": 4.7,
-        "advances": true,
-        "clinched": false
-      },
-      {
-        "team": "Egypt",
-        "gp": 1,
-        "pts": 1,
-        "gd": 0,
-        "gf": 1,
-        "xpts": 3.95,
+        "xpts": 4.79,
         "advances": true,
         "clinched": false
       },
@@ -281,17 +281,17 @@
         "pts": 2,
         "gd": 0,
         "gf": 2,
-        "xpts": 3.66,
+        "xpts": 3.6,
         "advances": false,
         "clinched": false
       },
       {
         "team": "New Zealand",
-        "gp": 1,
+        "gp": 2,
         "pts": 1,
-        "gd": 0,
-        "gf": 2,
-        "xpts": 2.01,
+        "gd": -2,
+        "gf": 3,
+        "xpts": 1.15,
         "advances": false,
         "clinched": false
       }
@@ -790,16 +790,16 @@
       {
         "home": "Belgium",
         "away": "New Zealand",
-        "p_home": 0.868,
-        "p_draw": 0.101,
-        "p_away": 0.032
+        "p_home": 0.912,
+        "p_draw": 0.059,
+        "p_away": 0.029
       },
       {
         "home": "Egypt",
         "away": "Iran",
-        "p_home": 0.274,
-        "p_draw": 0.26,
-        "p_away": 0.467
+        "p_home": 0.298,
+        "p_draw": 0.253,
+        "p_away": 0.449
       },
       {
         "home": "Egypt",
@@ -1040,123 +1040,119 @@
   "champion_odds": [
     {
       "team": "Argentina",
-      "prob": 0.2914
+      "prob": 0.2352
     },
     {
       "team": "England",
-      "prob": 0.1609
+      "prob": 0.1549
     },
     {
       "team": "Spain",
-      "prob": 0.1254
+      "prob": 0.1394
     },
     {
       "team": "France",
-      "prob": 0.0645
+      "prob": 0.0683
     },
     {
       "team": "Brazil",
-      "prob": 0.0587
+      "prob": 0.0635
+    },
+    {
+      "team": "Belgium",
+      "prob": 0.0624
     },
     {
       "team": "Colombia",
       "prob": 0.0537
     },
     {
-      "team": "Belgium",
-      "prob": 0.0405
-    },
-    {
       "team": "Mexico",
-      "prob": 0.0371
+      "prob": 0.0358
     },
     {
       "team": "Germany",
-      "prob": 0.0311
-    },
-    {
-      "team": "Norway",
-      "prob": 0.0209
+      "prob": 0.0331
     },
     {
       "team": "Croatia",
-      "prob": 0.0191
+      "prob": 0.0235
     },
     {
       "team": "Portugal",
-      "prob": 0.0181
+      "prob": 0.0218
     },
     {
-      "team": "Netherlands",
-      "prob": 0.0101
-    },
-    {
-      "team": "Switzerland",
-      "prob": 0.009
-    },
-    {
-      "team": "Austria",
-      "prob": 0.0086
+      "team": "Norway",
+      "prob": 0.021
     },
     {
       "team": "Senegal",
-      "prob": 0.0084
+      "prob": 0.0151
     },
     {
-      "team": "Morocco",
-      "prob": 0.0084
+      "team": "Netherlands",
+      "prob": 0.0115
+    },
+    {
+      "team": "Austria",
+      "prob": 0.0112
+    },
+    {
+      "team": "Switzerland",
+      "prob": 0.0097
     },
     {
       "team": "Ivory Coast",
-      "prob": 0.0081
+      "prob": 0.0079
     },
     {
-      "team": "Japan",
-      "prob": 0.0053
+      "team": "Morocco",
+      "prob": 0.0074
     },
     {
       "team": "United States",
-      "prob": 0.0049
+      "prob": 0.0063
     },
     {
-      "team": "Paraguay",
-      "prob": 0.003
+      "team": "Japan",
+      "prob": 0.0051
     },
     {
       "team": "Algeria",
-      "prob": 0.0025
-    },
-    {
-      "team": "Iran",
-      "prob": 0.0023
+      "prob": 0.0042
     },
     {
       "team": "Egypt",
-      "prob": 0.0023
+      "prob": 0.0017
     },
     {
-      "team": "Canada",
-      "prob": 0.002
+      "team": "Iran",
+      "prob": 0.0015
     },
     {
       "team": "South Korea",
-      "prob": 0.0009
+      "prob": 0.0012
+    },
+    {
+      "team": "Canada",
+      "prob": 0.0011
+    },
+    {
+      "team": "Paraguay",
+      "prob": 0.001
     },
     {
       "team": "Scotland",
       "prob": 0.0008
     },
     {
+      "team": "Australia",
+      "prob": 0.0005
+    },
+    {
       "team": "Sweden",
       "prob": 0.0005
-    },
-    {
-      "team": "Cape Verde",
-      "prob": 0.0005
-    },
-    {
-      "team": "Australia",
-      "prob": 0.0004
     },
     {
       "team": "Ghana",
@@ -1164,7 +1160,11 @@
     },
     {
       "team": "DR Congo",
-      "prob": 0.0003
+      "prob": 0.0002
+    },
+    {
+      "team": "Cape Verde",
+      "prob": 0.0002
     }
   ],
   "stage_odds": {
@@ -1173,31 +1173,31 @@
       "R16": 0.3875,
       "QF": 0.0752,
       "SF": 0.0173,
-      "Final": 0.0043,
-      "Champion": 0.0009
+      "Final": 0.0047,
+      "Champion": 0.0012
     },
     "Switzerland": {
       "R32": 1.0,
       "R16": 0.6125,
       "QF": 0.2151,
       "SF": 0.0788,
-      "Final": 0.0266,
-      "Champion": 0.009
+      "Final": 0.0295,
+      "Champion": 0.0097
     },
     "Germany": {
       "R32": 1.0,
       "R16": 0.7366,
       "QF": 0.2792,
       "SF": 0.1377,
-      "Final": 0.0621,
-      "Champion": 0.0311
+      "Final": 0.0679,
+      "Champion": 0.0331
     },
     "Sweden": {
       "R32": 1.0,
       "R16": 0.2634,
       "QF": 0.0365,
       "SF": 0.0076,
-      "Final": 0.0018,
+      "Final": 0.0021,
       "Champion": 0.0005
     },
     "Netherlands": {
@@ -1205,40 +1205,40 @@
       "R16": 0.2614,
       "QF": 0.1782,
       "SF": 0.1108,
-      "Final": 0.0362,
-      "Champion": 0.0101
+      "Final": 0.0416,
+      "Champion": 0.0115
     },
     "Brazil": {
       "R32": 1.0,
       "R16": 0.7386,
       "QF": 0.5315,
       "SF": 0.3496,
-      "Final": 0.1443,
-      "Champion": 0.0587
+      "Final": 0.1597,
+      "Champion": 0.0635
     },
     "Morocco": {
       "R32": 1.0,
       "R16": 0.4883,
       "QF": 0.199,
       "SF": 0.0605,
-      "Final": 0.0191,
-      "Champion": 0.0084
+      "Final": 0.0171,
+      "Champion": 0.0074
     },
     "Japan": {
       "R32": 1.0,
       "R16": 0.5117,
       "QF": 0.212,
       "SF": 0.0653,
-      "Final": 0.0184,
-      "Champion": 0.0053
+      "Final": 0.0168,
+      "Champion": 0.0051
     },
     "France": {
       "R32": 1.0,
       "R16": 0.8048,
       "QF": 0.6037,
       "SF": 0.283,
-      "Final": 0.1415,
-      "Champion": 0.0645
+      "Final": 0.1503,
+      "Champion": 0.0683
     },
     "Australia": {
       "R32": 1.0,
@@ -1246,38 +1246,38 @@
       "QF": 0.0806,
       "SF": 0.0152,
       "Final": 0.0037,
-      "Champion": 0.0004
+      "Champion": 0.0005
     },
     "Ivory Coast": {
       "R32": 1.0,
       "R16": 0.3658,
       "QF": 0.1852,
       "SF": 0.0709,
-      "Final": 0.0216,
-      "Champion": 0.0081
+      "Final": 0.0202,
+      "Champion": 0.0079
     },
     "Norway": {
       "R32": 1.0,
       "R16": 0.6342,
       "QF": 0.4038,
       "SF": 0.1654,
-      "Final": 0.0533,
-      "Champion": 0.0209
+      "Final": 0.0531,
+      "Champion": 0.021
     },
     "Mexico": {
       "R32": 1.0,
       "R16": 0.8567,
       "QF": 0.3619,
       "SF": 0.1713,
-      "Final": 0.0848,
-      "Champion": 0.0371
+      "Final": 0.0828,
+      "Champion": 0.0358
     },
     "Scotland": {
       "R32": 1.0,
       "R16": 0.1433,
       "QF": 0.0329,
       "SF": 0.0128,
-      "Final": 0.0028,
+      "Final": 0.0024,
       "Champion": 0.0008
     },
     "England": {
@@ -1285,144 +1285,144 @@
       "R16": 0.8862,
       "QF": 0.5865,
       "SF": 0.4498,
-      "Final": 0.2257,
-      "Champion": 0.1609
+      "Final": 0.2208,
+      "Champion": 0.1549
     },
     "DR Congo": {
       "R32": 1.0,
       "R16": 0.1138,
       "QF": 0.0187,
       "SF": 0.004,
-      "Final": 0.0013,
-      "Champion": 0.0003
+      "Final": 0.0011,
+      "Champion": 0.0002
     },
     "United States": {
       "R32": 1.0,
       "R16": 0.6893,
-      "QF": 0.3069,
-      "SF": 0.0683,
-      "Final": 0.0137,
-      "Champion": 0.0049
+      "QF": 0.4082,
+      "SF": 0.0907,
+      "Final": 0.0173,
+      "Champion": 0.0063
     },
     "Algeria": {
       "R32": 1.0,
       "R16": 0.3107,
-      "QF": 0.0933,
-      "SF": 0.0317,
-      "Final": 0.0089,
-      "Champion": 0.0025
+      "QF": 0.1396,
+      "SF": 0.0472,
+      "Final": 0.0144,
+      "Champion": 0.0042
     },
-    "Belgium": {
+    "Egypt": {
       "R32": 1.0,
-      "R16": 0.6275,
-      "QF": 0.4151,
-      "SF": 0.2105,
-      "Final": 0.1248,
-      "Champion": 0.0405
+      "R16": 0.3465,
+      "QF": 0.12,
+      "SF": 0.0253,
+      "Final": 0.0051,
+      "Champion": 0.0017
     },
     "Senegal": {
       "R32": 1.0,
-      "R16": 0.3725,
-      "QF": 0.1847,
-      "SF": 0.0767,
-      "Final": 0.0294,
-      "Champion": 0.0084
+      "R16": 0.6535,
+      "QF": 0.3322,
+      "SF": 0.1338,
+      "Final": 0.0506,
+      "Champion": 0.0151
     },
     "Portugal": {
       "R32": 1.0,
       "R16": 0.4583,
       "QF": 0.1443,
-      "SF": 0.0771,
-      "Final": 0.0521,
-      "Champion": 0.0181
+      "SF": 0.0951,
+      "Final": 0.0639,
+      "Champion": 0.0218
     },
     "Croatia": {
       "R32": 1.0,
       "R16": 0.5417,
       "QF": 0.1916,
-      "SF": 0.1054,
-      "Final": 0.0521,
-      "Champion": 0.0191
+      "SF": 0.1328,
+      "Final": 0.0641,
+      "Champion": 0.0235
     },
     "Spain": {
       "R32": 1.0,
       "R16": 0.627,
       "QF": 0.4941,
-      "SF": 0.3576,
-      "Final": 0.2666,
-      "Champion": 0.1254
+      "SF": 0.3839,
+      "Final": 0.2848,
+      "Champion": 0.1394
     },
     "Austria": {
       "R32": 1.0,
       "R16": 0.373,
       "QF": 0.17,
-      "SF": 0.0727,
-      "Final": 0.0319,
-      "Champion": 0.0086
+      "SF": 0.0912,
+      "Final": 0.0403,
+      "Champion": 0.0112
     },
     "Canada": {
       "R32": 1.0,
       "R16": 0.6048,
       "QF": 0.3448,
-      "SF": 0.0606,
-      "Final": 0.0101,
-      "Champion": 0.002
+      "SF": 0.0452,
+      "Final": 0.0067,
+      "Champion": 0.0011
     },
     "Iran": {
       "R32": 1.0,
       "R16": 0.3952,
       "QF": 0.1565,
-      "SF": 0.0415,
-      "Final": 0.0124,
-      "Champion": 0.0023
+      "SF": 0.031,
+      "Final": 0.0093,
+      "Champion": 0.0015
     },
     "Argentina": {
       "R32": 1.0,
       "R16": 0.8422,
-      "QF": 0.737,
-      "SF": 0.5787,
-      "Final": 0.4212,
-      "Champion": 0.2914
+      "QF": 0.5991,
+      "SF": 0.4679,
+      "Final": 0.3428,
+      "Champion": 0.2352
     },
     "Cape Verde": {
       "R32": 1.0,
       "R16": 0.1578,
-      "QF": 0.0619,
-      "SF": 0.0193,
-      "Final": 0.0031,
-      "Champion": 0.0005
+      "QF": 0.0256,
+      "SF": 0.0079,
+      "Final": 0.0015,
+      "Champion": 0.0002
     },
     "Colombia": {
       "R32": 1.0,
       "R16": 0.8532,
       "QF": 0.4741,
-      "SF": 0.2061,
-      "Final": 0.1016,
+      "SF": 0.2114,
+      "Final": 0.1035,
       "Champion": 0.0537
     },
     "Ghana": {
       "R32": 1.0,
       "R16": 0.1468,
       "QF": 0.0246,
-      "SF": 0.0059,
-      "Final": 0.0016,
+      "SF": 0.0049,
+      "Final": 0.0012,
       "Champion": 0.0003
     },
     "Paraguay": {
       "R32": 1.0,
-      "R16": 0.5748,
-      "QF": 0.0955,
-      "SF": 0.0473,
-      "Final": 0.0134,
-      "Champion": 0.003
+      "R16": 0.232,
+      "QF": 0.039,
+      "SF": 0.0198,
+      "Final": 0.006,
+      "Champion": 0.001
     },
-    "Egypt": {
+    "Belgium": {
       "R32": 1.0,
-      "R16": 0.4252,
-      "QF": 0.1056,
-      "SF": 0.0406,
-      "Final": 0.0096,
-      "Champion": 0.0023
+      "R16": 0.768,
+      "QF": 0.3363,
+      "SF": 0.2119,
+      "Final": 0.1147,
+      "Champion": 0.0624
     }
   },
   "bracket": {
@@ -1488,7 +1488,7 @@
         "b_conf": false
       },
       "82": {
-        "a": "Belgium",
+        "a": "Egypt",
         "b": "Senegal",
         "a_conf": false,
         "b_conf": false
@@ -1525,7 +1525,7 @@
       },
       "88": {
         "a": "Paraguay",
-        "b": "Egypt",
+        "b": "Belgium",
         "a_conf": false,
         "b_conf": false
       },
@@ -1652,79 +1652,7 @@
     }
   },
   "stage_progress": {
-    "Ghana": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Belgium": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Scotland": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Haiti": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Cape Verde": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Switzerland": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Spain": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Uruguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "South Korea": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Germany": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "South Africa": {
-      "reached": null,
-      "eliminated": false
-    },
-    "France": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Mexico": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Norway": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Croatia": {
-      "reached": null,
-      "eliminated": false
-    },
     "Ecuador": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Algeria": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Jordan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Australia": {
       "reached": null,
       "eliminated": false
     },
@@ -1732,7 +1660,19 @@
       "reached": null,
       "eliminated": false
     },
-    "Czech Republic": {
+    "Saudi Arabia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Cape Verde": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Scotland": {
+      "reached": null,
+      "eliminated": false
+    },
+    "DR Congo": {
       "reached": null,
       "eliminated": false
     },
@@ -1740,39 +1680,7 @@
       "reached": null,
       "eliminated": false
     },
-    "Bosnia and Herzegovina": {
-      "reached": null,
-      "eliminated": false
-    },
     "Sweden": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Japan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Canada": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Paraguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Curaçao": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Austria": {
-      "reached": null,
-      "eliminated": false
-    },
-    "United States": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Tunisia": {
       "reached": null,
       "eliminated": false
     },
@@ -1780,15 +1688,27 @@
       "reached": null,
       "eliminated": false
     },
-    "Ivory Coast": {
+    "Croatia": {
       "reached": null,
       "eliminated": false
     },
-    "Brazil": {
+    "Algeria": {
       "reached": null,
       "eliminated": false
     },
-    "Uzbekistan": {
+    "Australia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Uruguay": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Ghana": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Norway": {
       "reached": null,
       "eliminated": false
     },
@@ -1796,19 +1716,11 @@
       "reached": null,
       "eliminated": false
     },
+    "England": {
+      "reached": null,
+      "eliminated": false
+    },
     "Portugal": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Panama": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Senegal": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Saudi Arabia": {
       "reached": null,
       "eliminated": false
     },
@@ -1816,11 +1728,47 @@
       "reached": null,
       "eliminated": false
     },
+    "Switzerland": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Mexico": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "South Africa": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Belgium": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Morocco": {
+      "reached": null,
+      "eliminated": false
+    },
     "Netherlands": {
       "reached": null,
       "eliminated": false
     },
-    "England": {
+    "France": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Tunisia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Spain": {
+      "reached": null,
+      "eliminated": false
+    },
+    "South Korea": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Argentina": {
       "reached": null,
       "eliminated": false
     },
@@ -1832,15 +1780,67 @@
       "reached": null,
       "eliminated": false
     },
-    "DR Congo": {
+    "Canada": {
       "reached": null,
       "eliminated": false
     },
-    "Morocco": {
+    "Czech Republic": {
       "reached": null,
       "eliminated": false
     },
-    "Argentina": {
+    "Bosnia and Herzegovina": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Panama": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Paraguay": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Germany": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Senegal": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Jordan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Austria": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Ivory Coast": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Curaçao": {
+      "reached": null,
+      "eliminated": false
+    },
+    "United States": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Uzbekistan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Japan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Brazil": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Haiti": {
       "reached": null,
       "eliminated": false
     }
