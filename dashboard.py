@@ -660,14 +660,14 @@ with tab_track:
         latest = hist[-1]['champ']
         top = [t for t, _ in sorted(latest.items(), key=lambda x: -x[1])[:6]]
         rows = []
-        for i, snap in enumerate(hist):
-            row = {'update': i + 1}
+        for snap in hist:
+            row = {'Date': pd.to_datetime(snap['ts'])}
             for t in top:
                 row[t] = round(snap['champ'].get(t, 0) * 100, 1)
             rows.append(row)
-        st.line_chart(pd.DataFrame(rows).set_index('update'), height=360)
-        st.caption("Title odds (%) for the current top 6, tracked across each odds update "
-                   "as results came in.")
+        chart_df = pd.DataFrame(rows).set_index('Date')
+        st.line_chart(chart_df, height=360)
+        st.caption("Title odds (%) for the current top 6, tracked over time as results came in.")
     else:
         st.info("Need at least two odds updates to chart a trend — this builds up "
                 "as the tournament progresses.")
