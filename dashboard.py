@@ -574,7 +574,8 @@ with tab_runs:
     st.dataframe(pd.DataFrame(rows), hide_index=True,
                  use_container_width=True, height=600)
     st.caption("✅ reached (confirmed) · ❌ eliminated · otherwise model probability. "
-               "R32 % is the projected field until a team clinches.")
+               "Every % is a true probability from simulating the rest of the tournament "
+               "10,000 times.")
 
 # ===== TAB: Groups =====
 with tab_groups:
@@ -677,6 +678,7 @@ with tab_track:
     st.subheader("Model updates")
     st.markdown("""
 **June 24, 2026**
+- **Full group-stage simulation** — R32 and advancement odds are now true probabilities (the remaining group games are simulated, not assumed to a fixed projected field).
 - **Track Record tab** — this page: prediction record, championship-odds-over-time, and this changelog.
 - **Live in-game win probability** — a Bayesian model that updates each match's odds in real time from the score and clock, with a next-game preview.
 
@@ -714,7 +716,7 @@ Python · XGBoost · scikit-learn · pandas library · Streamlit (for dashboard)
 I built this as a learning project and used AI (Claude Opus 4.8 model) as a programming partner and teacher. Claude wrote most of this code, but only under my direction and vision. I specified what I had in mind, what each feature should do, as well as reviewing and testing the output, making sure I understood every change that was being made so that I could explain, debug, and extend the model. Beyond this model, Claude helped me by explaining ML concepts and pressure-testing ideas. With that being said, every modeling decision was mine to make and verify: I designed the approach, ran the backtests (with the AI's assistance for large scale backtests consisting of hundreds of games), and cut changes that didn't hold up (including a newer dataset that backtested worse results for this model). I utilized AI to speed up the build and teach me new concepts, the judgment and final decision was all mine.
 
 **Known limitations**
-The goal of this model is to try and predict outcomes, not specific scores (so the probability of a team winning doesn't necessarily correspond with the actual end score), and the Round of 32 field is currently a projection rather than a full group-stage simulation. That being said, I still have ideas for improvements on the horizon, so stay tuned!
+The goal of this model is to try and predict outcomes, not specific scores (so the probability of a team winning doesn't necessarily correspond with the actual end score). That being said, I still have ideas for improvements on the horizon, so stay tuned!
 
 Built by Krishna Vankayala - [GitHub repo](https://github.com/krishna-on-gh/fifa-worldcup-2026-predictor)
 

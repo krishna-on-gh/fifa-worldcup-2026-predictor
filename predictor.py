@@ -557,6 +557,84 @@ else:
 # KNOCKOUT STAGE — Monte Carlo simulation
 # ============================================================
 import random
+from math import exp, factorial
+try:
+    from scipy.optimize import minimize as _minimize
+    _HAVE_SCIPY = True
+except Exception:
+    _HAVE_SCIPY = False
+
+
+def _pois(k, lam):
+    return exp(-lam) * lam ** k / factorial(k)
+
+
+def _wdl_from_lambdas(lh, la, maxg=10):
+    """Independent-Poisson home/draw/away probabilities for given goal rates."""
+    hp = [_pois(i, lh) for i in range(maxg + 1)]
+    ap = [_pois(j, la) for j in range(maxg + 1)]
+    ph = pdr = pa = 0.0
+    for i in range(maxg + 1):
+        for j in range(maxg + 1):
+            p = hp[i] * ap[j]
+            if i > j: ph += p
+            elif i == j: pdr += p
+            else: pa += p
+    return ph, pdr, pa
+
+
+def implied_lambdas(p_home, p_draw, p_away):
+    """Invert pre-match odds -> (lambda_home, lambda_away) best reproducing them."""
+    def loss(x):
+        lh, la = x
+        if lh <= 0.02 or la <= 0.02 or lh > 6 or la > 6:
+            return 1e9
+        ph, pdr, pa = _wdl_from_lambdas(lh, la)
+        return (ph - p_home) ** 2 + (pdr - p_draw) ** 2 + (pa - p_away) ** 2
+    if _HAVE_SCIPY:
+        r = _minimize(loss, [1.3, 1.1], method='Nelder-Mead',
+                      options={'xatol': 1e-3, 'fatol': 1e-7})
+        lh, la = r.x
+    else:                                   # scipy-free fallback: coarse grid
+        best, lh, la = 1e9, 1.3, 1.1
+        grid = [0.1 + 0.05 * k for k in range(70)]
+        for x in grid:
+            for y in grid:
+                e = loss((x, y))
+                if e < best:
+                    best, lh, la = e, x, y
+    return max(0.05, round(lh, 3)), max(0.05, round(la, 3))
+
+
+def _pois_sample(lam):
+    """Draw a Poisson sample (Knuth) via random() so it respects the global seed."""
+    if lam <= 0:
+        return 0
+    L = exp(-lam)
+    k, p = 0, 1.0
+    while True:
+        k += 1
+        p *= random.random()
+        if p <= L:
+            return k - 1
+
+
+def build_r32(win, run, third_slot, third_first):
+    """Build the Round-of-32 matchups from group positions (official 2026 structure)."""
+    def tt(slot):
+        g = third_slot.get(slot)
+        return third_first[g] if g else None
+    return {
+        73: (run['A'], run['B']),   74: (win['E'], tt(74)),
+        75: (win['F'], run['C']),   76: (win['C'], run['F']),
+        77: (win['I'], tt(77)),     78: (run['E'], run['I']),
+        79: (win['A'], tt(79)),     80: (win['L'], tt(80)),
+        81: (win['D'], tt(81)),     82: (win['G'], tt(82)),
+        83: (run['K'], run['L']),   84: (win['H'], run['J']),
+        85: (win['B'], tt(85)),     86: (win['J'], run['H']),
+        87: (win['K'], tt(87)),     88: (run['D'], run['G']),
+    }
+
 
 # ---- 1. Group positions (deterministic from standings: 1st / 2nd / 3rd) ----
 winner = {g: s[0][0] for g, s in group_standings.items()}
@@ -604,16 +682,8 @@ def _play(a, b):
     return a if random.random() < advance_prob(a, b) else b
 
 # ---- 4. The REAL 2026 bracket: Round-of-32 matchups by group position ----
-R32 = {
-    73: (runner['A'], runner['B']),   74: (winner['E'], third_team(74)),
-    75: (winner['F'], runner['C']),   76: (winner['C'], runner['F']),
-    77: (winner['I'], third_team(77)), 78: (runner['E'], runner['I']),
-    79: (winner['A'], third_team(79)), 80: (winner['L'], third_team(80)),
-    81: (winner['D'], third_team(81)), 82: (winner['G'], third_team(82)),
-    83: (runner['K'], runner['L']),   84: (winner['H'], runner['J']),
-    85: (winner['B'], third_team(85)), 86: (winner['J'], runner['H']),
-    87: (winner['K'], third_team(87)), 88: (runner['D'], runner['G']),
-}
+# Deterministic (projected) field — used for the bracket VISUAL + confirmed flags.
+R32 = build_r32(winner, runner, _third_slot, {g: third[g][0] for g in third})
 # Fixed tree — each match's two inputs are the WINNERS of earlier matches.
 # Label = the stage a match WINNER reaches.
 ROUNDS = [
@@ -649,14 +719,47 @@ for _stage, _ms in ROUNDS:
         if _fk[_m]:
             FORCED[_m] = _fk[_m]
 
-# ---- Simulate the bracket once, tracking how far each team gets ----
+# ---- Group-stage sim inputs: base (played) stats + unplayed games with goal rates ----
+_all_group_teams = [t for ts in groups.values() for t in ts]
+_base_pts = {t: int(team_pts.get(t, 0)) for t in _all_group_teams}
+_base_gd = {t: int(team_gd.get(t, 0)) for t in _all_group_teams}
+_base_gf = {t: int(team_gf.get(t, 0)) for t in _all_group_teams}
+_unplayed = {}     # group -> [(home, away, lambda_home, lambda_away)]
+for _g, _ms in group_matches.items():
+    _lst = []
+    for (_h, _a, _ph, _pd, _pa) in _ms:
+        if frozenset((_h, _a)) in actual_wc_pts:
+            continue                                      # already played -> in base
+        _lh, _la = implied_lambdas(_ph, _pd, _pa)
+        _lst.append((_h, _a, _lh, _la))
+    _unplayed[_g] = _lst
+
+# ---- Simulate the WHOLE tournament once: remaining group games -> R32 field ->
+#      knockouts. Field varies per run, so odds become true probabilities. ----
 def simulate_once(reached):
+    win_s, run_s, third_first_s, third_stats = {}, {}, {}, {}
+    for g, teams in groups.items():
+        pts = {t: _base_pts[t] for t in teams}
+        gd = {t: _base_gd[t] for t in teams}
+        gf = {t: _base_gf[t] for t in teams}
+        for (h, a, lh, la) in _unplayed[g]:               # play out remaining group games
+            hg, ag = _pois_sample(lh), _pois_sample(la)
+            if hg > ag: pts[h] += 3
+            elif ag > hg: pts[a] += 3
+            else: pts[h] += 1; pts[a] += 1
+            gd[h] += hg - ag; gd[a] += ag - hg; gf[h] += hg; gf[a] += ag
+        order = sorted(teams, key=lambda t: (pts[t], gd[t], gf[t]), reverse=True)
+        win_s[g], run_s[g], third_first_s[g] = order[0], order[1], order[2]
+        third_stats[g] = (pts[order[2]], gd[order[2]], gf[order[2]])
+    best = sorted(groups.keys(), key=lambda g: third_stats[g], reverse=True)[:8]
+    r32 = build_r32(win_s, run_s, _assign_thirds(best), third_first_s)
+
     w = {}
-    for a, b in R32.values():
-        reached[a]['R32'] += 1; reached[b]['R32'] += 1   # all 32 reached R32
-    for m, (a, b) in R32.items():
+    for a, b in r32.values():
+        reached[a]['R32'] += 1; reached[b]['R32'] += 1
+    for m, (a, b) in r32.items():
         w[m] = FORCED[m] if m in FORCED else _play(a, b)
-        reached[w[m]]['R16'] += 1                          # R32 winners reach R16
+        reached[w[m]]['R16'] += 1
     for stage, matches in ROUNDS:
         for m, (x, y) in matches.items():
             w[m] = FORCED[m] if m in FORCED else _play(w[x], w[y])
@@ -842,54 +945,6 @@ if os.path.exists('predictions.json'):
         _prev_history = _prev.get('odds_history', [])
     except Exception:
         pass
-
-# ---- Live-odds prior: implied goal rates (lambdas) from pre-match W/D/L odds.
-# Find the Poisson scoring rates whose scoreline distribution reproduces the
-# pre-match odds, so the live model starts exactly at the baseline at minute 0. ----
-from math import exp, factorial
-try:
-    from scipy.optimize import minimize as _minimize
-    _HAVE_SCIPY = True
-except Exception:
-    _HAVE_SCIPY = False
-
-def _pois(k, lam):
-    return exp(-lam) * lam ** k / factorial(k)
-
-def _wdl_from_lambdas(lh, la, maxg=10):
-    """Independent-Poisson home/draw/away probabilities for given goal rates."""
-    hp = [_pois(i, lh) for i in range(maxg + 1)]
-    ap = [_pois(j, la) for j in range(maxg + 1)]
-    ph = pdr = pa = 0.0
-    for i in range(maxg + 1):
-        for j in range(maxg + 1):
-            p = hp[i] * ap[j]
-            if i > j: ph += p
-            elif i == j: pdr += p
-            else: pa += p
-    return ph, pdr, pa
-
-def implied_lambdas(p_home, p_draw, p_away):
-    """Invert pre-match odds -> (lambda_home, lambda_away) best reproducing them."""
-    def loss(x):
-        lh, la = x
-        if lh <= 0.02 or la <= 0.02 or lh > 6 or la > 6:
-            return 1e9
-        ph, pdr, pa = _wdl_from_lambdas(lh, la)
-        return (ph - p_home) ** 2 + (pdr - p_draw) ** 2 + (pa - p_away) ** 2
-    if _HAVE_SCIPY:
-        r = _minimize(loss, [1.3, 1.1], method='Nelder-Mead',
-                      options={'xatol': 1e-3, 'fatol': 1e-7})
-        lh, la = r.x
-    else:                                   # scipy-free fallback: coarse grid
-        best, lh, la = 1e9, 1.3, 1.1
-        grid = [0.1 + 0.05 * k for k in range(70)]
-        for x in grid:
-            for y in grid:
-                e = loss((x, y))
-                if e < best:
-                    best, lh, la = e, x, y
-    return max(0.05, round(lh, 3)), max(0.05, round(la, 3))
 
 def _gm_entry(h, a, ph, pd_, pa):
     pair = frozenset((h, a))
