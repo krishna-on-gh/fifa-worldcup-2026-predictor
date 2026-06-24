@@ -169,8 +169,9 @@ live = fetch_live()
 
 st.caption(f"Odds from {data['n_sims']:,} Monte Carlo simulations")
 
-tab_games, tab_groups, tab_runs, tab_champ, tab_about = st.tabs(
-    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds", "About/Methodology"]
+tab_games, tab_groups, tab_runs, tab_champ, tab_track, tab_about = st.tabs(
+    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds",
+     "📋 Track record", "About/Methodology"]
 )
 
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
@@ -626,6 +627,69 @@ with tab_groups:
     st.caption("The 8 best third-place teams reach the R32, ranked by xPts → GD → "
                "goals for. ✅ projected in · ❌ projected out. Re-ranks every refresh "
                "as standings (and who holds each group's 3rd slot) change.")
+
+# ===== TAB: Track record =====
+with tab_track:
+    st.subheader("How the model has done")
+
+    # --- Prediction record on completed games ---
+    tr = data.get('track_record', [])
+    if tr:
+        correct = sum(1 for r in tr if r['correct'])
+        total = len(tr)
+        c1, c2 = st.columns(2)
+        c1.metric("Predictions correct", f"{correct}/{total}")
+        c2.metric("Hit rate", f"{correct / total:.0%}" if total else "—")
+        st.caption("The model's pre-match pick vs the actual result, for every completed game.")
+        rows = [{'Date': r['date'], 'Match': f"{r['home']} {r['score']} {r['away']}",
+                 'Predicted': r['pred'], 'Actual': r['actual'],
+                 'Result': '✅' if r['correct'] else '❌', 'Stage': r['stage']}
+                for r in reversed(tr)]
+        st.dataframe(pd.DataFrame(rows), hide_index=True,
+                     use_container_width=True, height=420)
+    else:
+        st.info("No completed games yet — the record fills in as games finish.")
+
+    st.divider()
+
+    # --- Championship odds over time ---
+    st.subheader("Championship odds over time")
+    hist = data.get('odds_history', [])
+    if len(hist) >= 2:
+        latest = hist[-1]['champ']
+        top = [t for t, _ in sorted(latest.items(), key=lambda x: -x[1])[:6]]
+        rows = []
+        for i, snap in enumerate(hist):
+            row = {'update': i + 1}
+            for t in top:
+                row[t] = round(snap['champ'].get(t, 0) * 100, 1)
+            rows.append(row)
+        st.line_chart(pd.DataFrame(rows).set_index('update'), height=360)
+        st.caption("Title odds (%) for the current top 6, tracked across each odds update "
+                   "as results came in.")
+    else:
+        st.info("Need at least two odds updates to chart a trend — this builds up "
+                "as the tournament progresses.")
+
+    st.divider()
+
+    # --- Model updates / changelog (edit this list as you ship changes) ---
+    st.subheader("Model updates")
+    st.markdown("""
+**June 24, 2026**
+- **Track Record tab** — this page: prediction record, championship-odds-over-time, and this changelog.
+- **Live in-game win probability** — a Bayesian model that updates each match's odds in real time from the score and clock, with a next-game preview.
+
+**June 23, 2026**
+- **Clinch detection** — teams are flagged the moment they've mathematically secured a Round-of-32 spot.
+- **Goal-difference tiebreaks** — group standings break ties on actual GD, then goals scored.
+- **Real group stats** — added Games Played, Points, and GD columns plus a third-place race table.
+
+**June 22, 2026**
+- **Results-conditioned odds** — knockout results lock into the simulation, so eliminated teams drop to 0% and everyone else recomputes.
+- **Interactive bracket** — hover any team to trace its route to the final and see its stage odds.
+""")
+
 
 # ===== TAB: About =====
 with tab_about:

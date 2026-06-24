@@ -832,12 +832,14 @@ _played_pairs = {frozenset((r['home_team'], r['away_team']))
                  for _, r in df[(df['tournament'] == 'FIFA World Cup')
                                 & (df['date'].dt.year == 2026)].iterrows()}
 _locked_gm = {}
+_prev_history = []                       # championship-odds snapshots from prior runs
 if os.path.exists('predictions.json'):
     try:
         _prev = json.load(open('predictions.json', encoding='utf-8'))
         for _ms in _prev.get('group_matches', {}).values():
             for _m in _ms:
                 _locked_gm[frozenset((_m['home'], _m['away']))] = _m
+        _prev_history = _prev.get('odds_history', [])
     except Exception:
         pass
 
@@ -1074,6 +1076,37 @@ export = {
     'stage_progress': {t: {'reached': _reached.get(t), 'eliminated': t in _elim}
                        for t in _all_teams},
 }
+
+# ---- Track record: model's pre-match pick vs actual result for every game ----
+_actual_played = {}
+for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
+    _actual_played[frozenset((_r.home_team, _r.away_team))] = (
+        _r.home_team, int(_r.home_score), int(_r.away_score), str(_r.date.date()))
+_track = []
+for _g, _ms in export['group_matches'].items():
+    for _m in _ms:
+        _pair = frozenset((_m['home'], _m['away']))
+        if _pair not in _actual_played:
+            continue
+        _ph, _pdr, _pa = _m['p_home'], _m['p_draw'], _m['p_away']
+        _pred = (_m['home'] if (_ph >= _pa and _ph >= _pdr)
+                 else (_m['away'] if (_pa >= _ph and _pa >= _pdr) else 'Draw'))
+        _hh, _hs, _as, _dt = _actual_played[_pair]
+        _oh, _oa = (_hs, _as) if _hh == _m['home'] else (_as, _hs)
+        _act = _m['home'] if _oh > _oa else (_m['away'] if _oa > _oh else 'Draw')
+        _track.append({'date': _dt, 'home': _m['home'], 'away': _m['away'],
+                       'score': f'{_oh}-{_oa}', 'pred': _pred, 'actual': _act,
+                       'correct': _pred == _act, 'stage': f'Group {_g}'})
+_track.sort(key=lambda x: x['date'])
+export['track_record'] = _track
+
+# ---- Championship-odds history: append a snapshot only when the odds change ----
+_champ_now = {x['team']: x['prob'] for x in export['champion_odds']}
+_history = list(_prev_history)
+if not _history or _history[-1].get('champ') != _champ_now:
+    _history.append({'ts': str(pd.Timestamp.now()),
+                     'n_played': len(_played_pairs), 'champ': _champ_now})
+export['odds_history'] = _history
 
 with open('predictions.json', 'w', encoding='utf-8') as f:
     json.dump(export, f, indent=2, ensure_ascii=False)

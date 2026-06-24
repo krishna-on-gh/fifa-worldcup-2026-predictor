@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-24 13:28:00.815441",
+  "generated": "2026-06-24 13:50:11.099868",
   "n_sims": 10000,
   "groups": {
     "A": [
@@ -1700,107 +1700,11 @@
     }
   },
   "stage_progress": {
-    "South Korea": {
+    "Qatar": {
       "reached": null,
-      "eliminated": false
-    },
-    "Uruguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Turkey": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Algeria": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Morocco": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Portugal": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Haiti": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Japan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Spain": {
-      "reached": null,
-      "eliminated": false
-    },
-    "DR Congo": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Uzbekistan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "United States": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Ecuador": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Brazil": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Argentina": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Ivory Coast": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Netherlands": {
-      "reached": null,
-      "eliminated": false
-    },
-    "South Africa": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Curaçao": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Sweden": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Ghana": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Colombia": {
-      "reached": "R32",
       "eliminated": false
     },
     "England": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Panama": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Paraguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Scotland": {
       "reached": null,
       "eliminated": false
     },
@@ -1808,67 +1712,7 @@
       "reached": null,
       "eliminated": false
     },
-    "Qatar": {
-      "reached": null,
-      "eliminated": false
-    },
-    "France": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Jordan": {
-      "reached": null,
-      "eliminated": false
-    },
     "Iran": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Croatia": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Czech Republic": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Saudi Arabia": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Norway": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "New Zealand": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Cape Verde": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Austria": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Belgium": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Canada": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Mexico": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Tunisia": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Iraq": {
       "reached": null,
       "eliminated": false
     },
@@ -1876,11 +1720,15 @@
       "reached": "R32",
       "eliminated": false
     },
-    "Egypt": {
+    "Japan": {
       "reached": null,
       "eliminated": false
     },
-    "Bosnia and Herzegovina": {
+    "Jordan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Uzbekistan": {
       "reached": null,
       "eliminated": false
     },
@@ -1888,9 +1736,683 @@
       "reached": null,
       "eliminated": false
     },
+    "Ecuador": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Austria": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Curaçao": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Brazil": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Haiti": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Czech Republic": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Colombia": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Sweden": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Algeria": {
+      "reached": null,
+      "eliminated": false
+    },
+    "DR Congo": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Croatia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "France": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Turkey": {
+      "reached": null,
+      "eliminated": false
+    },
+    "United States": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Spain": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Bosnia and Herzegovina": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Morocco": {
+      "reached": null,
+      "eliminated": false
+    },
     "Senegal": {
       "reached": null,
       "eliminated": false
+    },
+    "Tunisia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Cape Verde": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Scotland": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Egypt": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Mexico": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Portugal": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Ivory Coast": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Belgium": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Iraq": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Netherlands": {
+      "reached": null,
+      "eliminated": false
+    },
+    "South Korea": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Argentina": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Canada": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Panama": {
+      "reached": null,
+      "eliminated": false
+    },
+    "South Africa": {
+      "reached": null,
+      "eliminated": false
+    },
+    "New Zealand": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Ghana": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Paraguay": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Uruguay": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Norway": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Saudi Arabia": {
+      "reached": null,
+      "eliminated": false
     }
-  }
+  },
+  "track_record": [
+    {
+      "date": "2026-06-11",
+      "home": "Mexico",
+      "away": "South Africa",
+      "score": "2-0",
+      "pred": "Mexico",
+      "actual": "Mexico",
+      "correct": true,
+      "stage": "Group A"
+    },
+    {
+      "date": "2026-06-11",
+      "home": "South Korea",
+      "away": "Czech Republic",
+      "score": "2-1",
+      "pred": "South Korea",
+      "actual": "South Korea",
+      "correct": true,
+      "stage": "Group A"
+    },
+    {
+      "date": "2026-06-12",
+      "home": "Canada",
+      "away": "Bosnia and Herzegovina",
+      "score": "1-1",
+      "pred": "Canada",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group B"
+    },
+    {
+      "date": "2026-06-12",
+      "home": "United States",
+      "away": "Paraguay",
+      "score": "4-1",
+      "pred": "United States",
+      "actual": "United States",
+      "correct": true,
+      "stage": "Group D"
+    },
+    {
+      "date": "2026-06-13",
+      "home": "Switzerland",
+      "away": "Qatar",
+      "score": "1-1",
+      "pred": "Switzerland",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group B"
+    },
+    {
+      "date": "2026-06-13",
+      "home": "Brazil",
+      "away": "Morocco",
+      "score": "1-1",
+      "pred": "Draw",
+      "actual": "Draw",
+      "correct": true,
+      "stage": "Group C"
+    },
+    {
+      "date": "2026-06-13",
+      "home": "Haiti",
+      "away": "Scotland",
+      "score": "0-1",
+      "pred": "Scotland",
+      "actual": "Scotland",
+      "correct": true,
+      "stage": "Group C"
+    },
+    {
+      "date": "2026-06-13",
+      "home": "Australia",
+      "away": "Turkey",
+      "score": "2-0",
+      "pred": "Turkey",
+      "actual": "Australia",
+      "correct": false,
+      "stage": "Group D"
+    },
+    {
+      "date": "2026-06-14",
+      "home": "Germany",
+      "away": "Curaçao",
+      "score": "7-1",
+      "pred": "Germany",
+      "actual": "Germany",
+      "correct": true,
+      "stage": "Group E"
+    },
+    {
+      "date": "2026-06-14",
+      "home": "Ivory Coast",
+      "away": "Ecuador",
+      "score": "1-0",
+      "pred": "Ivory Coast",
+      "actual": "Ivory Coast",
+      "correct": true,
+      "stage": "Group E"
+    },
+    {
+      "date": "2026-06-14",
+      "home": "Netherlands",
+      "away": "Japan",
+      "score": "2-2",
+      "pred": "Netherlands",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group F"
+    },
+    {
+      "date": "2026-06-14",
+      "home": "Sweden",
+      "away": "Tunisia",
+      "score": "5-1",
+      "pred": "Sweden",
+      "actual": "Sweden",
+      "correct": true,
+      "stage": "Group F"
+    },
+    {
+      "date": "2026-06-15",
+      "home": "Belgium",
+      "away": "Egypt",
+      "score": "1-1",
+      "pred": "Belgium",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group G"
+    },
+    {
+      "date": "2026-06-15",
+      "home": "Iran",
+      "away": "New Zealand",
+      "score": "2-2",
+      "pred": "Iran",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group G"
+    },
+    {
+      "date": "2026-06-15",
+      "home": "Spain",
+      "away": "Cape Verde",
+      "score": "0-0",
+      "pred": "Spain",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group H"
+    },
+    {
+      "date": "2026-06-15",
+      "home": "Saudi Arabia",
+      "away": "Uruguay",
+      "score": "1-1",
+      "pred": "Uruguay",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group H"
+    },
+    {
+      "date": "2026-06-16",
+      "home": "France",
+      "away": "Senegal",
+      "score": "3-1",
+      "pred": "France",
+      "actual": "France",
+      "correct": true,
+      "stage": "Group I"
+    },
+    {
+      "date": "2026-06-16",
+      "home": "Iraq",
+      "away": "Norway",
+      "score": "1-4",
+      "pred": "Norway",
+      "actual": "Norway",
+      "correct": true,
+      "stage": "Group I"
+    },
+    {
+      "date": "2026-06-16",
+      "home": "Argentina",
+      "away": "Algeria",
+      "score": "3-0",
+      "pred": "Argentina",
+      "actual": "Argentina",
+      "correct": true,
+      "stage": "Group J"
+    },
+    {
+      "date": "2026-06-16",
+      "home": "Austria",
+      "away": "Jordan",
+      "score": "3-1",
+      "pred": "Austria",
+      "actual": "Austria",
+      "correct": true,
+      "stage": "Group J"
+    },
+    {
+      "date": "2026-06-17",
+      "home": "Portugal",
+      "away": "DR Congo",
+      "score": "1-1",
+      "pred": "Portugal",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group K"
+    },
+    {
+      "date": "2026-06-17",
+      "home": "Uzbekistan",
+      "away": "Colombia",
+      "score": "1-3",
+      "pred": "Colombia",
+      "actual": "Colombia",
+      "correct": true,
+      "stage": "Group K"
+    },
+    {
+      "date": "2026-06-17",
+      "home": "England",
+      "away": "Croatia",
+      "score": "4-2",
+      "pred": "England",
+      "actual": "England",
+      "correct": true,
+      "stage": "Group L"
+    },
+    {
+      "date": "2026-06-17",
+      "home": "Ghana",
+      "away": "Panama",
+      "score": "1-0",
+      "pred": "Panama",
+      "actual": "Ghana",
+      "correct": false,
+      "stage": "Group L"
+    },
+    {
+      "date": "2026-06-18",
+      "home": "Mexico",
+      "away": "South Korea",
+      "score": "1-0",
+      "pred": "Mexico",
+      "actual": "Mexico",
+      "correct": true,
+      "stage": "Group A"
+    },
+    {
+      "date": "2026-06-18",
+      "home": "Czech Republic",
+      "away": "South Africa",
+      "score": "1-1",
+      "pred": "Czech Republic",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group A"
+    },
+    {
+      "date": "2026-06-18",
+      "home": "Canada",
+      "away": "Qatar",
+      "score": "6-0",
+      "pred": "Canada",
+      "actual": "Canada",
+      "correct": true,
+      "stage": "Group B"
+    },
+    {
+      "date": "2026-06-18",
+      "home": "Switzerland",
+      "away": "Bosnia and Herzegovina",
+      "score": "4-1",
+      "pred": "Switzerland",
+      "actual": "Switzerland",
+      "correct": true,
+      "stage": "Group B"
+    },
+    {
+      "date": "2026-06-19",
+      "home": "Brazil",
+      "away": "Haiti",
+      "score": "3-0",
+      "pred": "Brazil",
+      "actual": "Brazil",
+      "correct": true,
+      "stage": "Group C"
+    },
+    {
+      "date": "2026-06-19",
+      "home": "Morocco",
+      "away": "Scotland",
+      "score": "1-0",
+      "pred": "Morocco",
+      "actual": "Morocco",
+      "correct": true,
+      "stage": "Group C"
+    },
+    {
+      "date": "2026-06-19",
+      "home": "United States",
+      "away": "Australia",
+      "score": "2-0",
+      "pred": "United States",
+      "actual": "United States",
+      "correct": true,
+      "stage": "Group D"
+    },
+    {
+      "date": "2026-06-19",
+      "home": "Paraguay",
+      "away": "Turkey",
+      "score": "1-0",
+      "pred": "Turkey",
+      "actual": "Paraguay",
+      "correct": false,
+      "stage": "Group D"
+    },
+    {
+      "date": "2026-06-20",
+      "home": "Germany",
+      "away": "Ivory Coast",
+      "score": "2-1",
+      "pred": "Draw",
+      "actual": "Germany",
+      "correct": false,
+      "stage": "Group E"
+    },
+    {
+      "date": "2026-06-20",
+      "home": "Curaçao",
+      "away": "Ecuador",
+      "score": "0-0",
+      "pred": "Ecuador",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group E"
+    },
+    {
+      "date": "2026-06-20",
+      "home": "Netherlands",
+      "away": "Sweden",
+      "score": "5-1",
+      "pred": "Netherlands",
+      "actual": "Netherlands",
+      "correct": true,
+      "stage": "Group F"
+    },
+    {
+      "date": "2026-06-20",
+      "home": "Japan",
+      "away": "Tunisia",
+      "score": "4-0",
+      "pred": "Japan",
+      "actual": "Japan",
+      "correct": true,
+      "stage": "Group F"
+    },
+    {
+      "date": "2026-06-21",
+      "home": "Belgium",
+      "away": "Iran",
+      "score": "0-0",
+      "pred": "Belgium",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group G"
+    },
+    {
+      "date": "2026-06-21",
+      "home": "Egypt",
+      "away": "New Zealand",
+      "score": "3-1",
+      "pred": "Egypt",
+      "actual": "Egypt",
+      "correct": true,
+      "stage": "Group G"
+    },
+    {
+      "date": "2026-06-21",
+      "home": "Spain",
+      "away": "Saudi Arabia",
+      "score": "4-0",
+      "pred": "Spain",
+      "actual": "Spain",
+      "correct": true,
+      "stage": "Group H"
+    },
+    {
+      "date": "2026-06-21",
+      "home": "Cape Verde",
+      "away": "Uruguay",
+      "score": "2-2",
+      "pred": "Uruguay",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group H"
+    },
+    {
+      "date": "2026-06-22",
+      "home": "France",
+      "away": "Iraq",
+      "score": "3-0",
+      "pred": "France",
+      "actual": "France",
+      "correct": true,
+      "stage": "Group I"
+    },
+    {
+      "date": "2026-06-22",
+      "home": "Senegal",
+      "away": "Norway",
+      "score": "2-3",
+      "pred": "Norway",
+      "actual": "Norway",
+      "correct": true,
+      "stage": "Group I"
+    },
+    {
+      "date": "2026-06-22",
+      "home": "Argentina",
+      "away": "Austria",
+      "score": "2-0",
+      "pred": "Argentina",
+      "actual": "Argentina",
+      "correct": true,
+      "stage": "Group J"
+    },
+    {
+      "date": "2026-06-22",
+      "home": "Algeria",
+      "away": "Jordan",
+      "score": "2-1",
+      "pred": "Algeria",
+      "actual": "Algeria",
+      "correct": true,
+      "stage": "Group J"
+    },
+    {
+      "date": "2026-06-23",
+      "home": "Portugal",
+      "away": "Uzbekistan",
+      "score": "5-0",
+      "pred": "Portugal",
+      "actual": "Portugal",
+      "correct": true,
+      "stage": "Group K"
+    },
+    {
+      "date": "2026-06-23",
+      "home": "DR Congo",
+      "away": "Colombia",
+      "score": "0-1",
+      "pred": "Colombia",
+      "actual": "Colombia",
+      "correct": true,
+      "stage": "Group K"
+    },
+    {
+      "date": "2026-06-23",
+      "home": "England",
+      "away": "Ghana",
+      "score": "0-0",
+      "pred": "England",
+      "actual": "Draw",
+      "correct": false,
+      "stage": "Group L"
+    },
+    {
+      "date": "2026-06-23",
+      "home": "Croatia",
+      "away": "Panama",
+      "score": "1-0",
+      "pred": "Croatia",
+      "actual": "Croatia",
+      "correct": true,
+      "stage": "Group L"
+    }
+  ],
+  "odds_history": [
+    {
+      "ts": "2026-06-24 13:50:11.226348",
+      "n_played": 48,
+      "champ": {
+        "Argentina": 0.2325,
+        "Spain": 0.1534,
+        "France": 0.0912,
+        "England": 0.0869,
+        "Belgium": 0.0771,
+        "Brazil": 0.0656,
+        "Colombia": 0.0543,
+        "Mexico": 0.0507,
+        "Germany": 0.03,
+        "Croatia": 0.0287,
+        "Portugal": 0.028,
+        "Norway": 0.0162,
+        "Austria": 0.012,
+        "Netherlands": 0.0118,
+        "Switzerland": 0.0093,
+        "Ivory Coast": 0.0092,
+        "United States": 0.0076,
+        "Morocco": 0.0069,
+        "Algeria": 0.0068,
+        "Japan": 0.0049,
+        "Uruguay": 0.0048,
+        "Sweden": 0.0022,
+        "Egypt": 0.0021,
+        "Iran": 0.0017,
+        "Canada": 0.0015,
+        "South Korea": 0.001,
+        "Paraguay": 0.001,
+        "Scotland": 0.0008,
+        "Ghana": 0.0008,
+        "Bosnia and Herzegovina": 0.0005,
+        "Australia": 0.0004,
+        "Cape Verde": 0.0001
+      }
+    }
+  ]
 }
