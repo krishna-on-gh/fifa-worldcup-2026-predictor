@@ -12,6 +12,7 @@ Provide it via ANY of:
   - .streamlit/secrets.toml  ->  FOOTBALL_DATA_API_KEY = "..."
 """
 import json
+import math
 import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -175,6 +176,50 @@ tab_games, tab_groups, tab_runs, tab_champ, tab_about = st.tabs(
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
 
 
+# ----- Live (in-game) win probability: Bayesian update of pre-match odds -----
+def _pois_pmf(k, lam):
+    return math.exp(-lam) * lam ** k / math.factorial(k)
+
+
+def live_odds(hs, as_, minutes_left, lh, la, maxg=10):
+    """Updated win/draw/loss probs given the current score and minutes left.
+    Models the REMAINING goals as Poisson (rate scaled by fraction of match left),
+    so at minute 0 (0-0, 90 left) it returns the pre-match baseline."""
+    frac = max(0.0, minutes_left) / 90.0
+    rh, ra = lh * frac, la * frac
+    hp = [_pois_pmf(i, rh) for i in range(maxg + 1)]
+    ap = [_pois_pmf(j, ra) for j in range(maxg + 1)]
+    ph = pd_ = pa = 0.0
+    for i in range(maxg + 1):
+        for j in range(maxg + 1):
+            p = hp[i] * ap[j]
+            fh, fa = hs + i, as_ + j
+            if fh > fa:
+                ph += p
+            elif fh == fa:
+                pd_ += p
+            else:
+                pa += p
+    return ph, pd_, pa
+
+
+def estimate_minute(utc_kickoff, status):
+    """Estimate match minute + minutes left from kickoff (API gives no live clock).
+    Returns (minute, minutes_left); PAUSED is treated as halftime."""
+    if status == 'PAUSED':
+        return 45, 45
+    try:
+        kickoff = pd.to_datetime(utc_kickoff)
+        wall = (pd.Timestamp.now(tz='UTC') - kickoff).total_seconds() / 60.0
+    except Exception:
+        return None, 45
+    if wall <= 0:
+        return 0, 90
+    minute = wall if wall <= 45 else min(90, wall - 15)   # subtract ~15' halftime
+    minute = max(0, min(90, minute))
+    return int(round(minute)), max(0, 90 - minute)
+
+
 def _outcome(hs, as_):
     return 'home' if hs > as_ else ('away' if hs < as_ else 'draw')
 
@@ -298,7 +343,29 @@ with tab_games:
                 with st.container(border=True):
                     st.markdown(f"### {lg['home']}  {lg['home_score']} – "
                                 f"{lg['away_score']}  {lg['away']}")
-                    st.caption(f"🔴 {lg.get('status')}")
+                    minute, mins_left = estimate_minute(lg.get('utcDate'), lg.get('status'))
+                    when_tag = ("HT" if lg.get('status') == 'PAUSED'
+                                else (f"~{minute}'" if minute is not None else "live"))
+                    st.caption(f"🔴 {lg.get('status')} · {when_tag} (est.)")
+
+                    pred = pred_lookup.get(frozenset((lg['home'], lg['away'])))
+                    if pred and 'lh' in pred and lg.get('home_score') is not None:
+                        # orient the live score to the prediction's home/away
+                        if lg['home'] == pred['home']:
+                            hs, as_ = lg['home_score'], lg['away_score']
+                        else:
+                            hs, as_ = lg['away_score'], lg['home_score']
+                        lp = live_odds(hs, as_, mins_left, pred['lh'], pred['la'])
+                        base = (pred['p_home'], pred['p_draw'], pred['p_away'])
+                        st.caption("Live win probability  ·  (pre-match)")
+                        for name, lv, bp in [(pred['home'], lp[0], base[0]),
+                                             ("Draw", lp[1], base[1]),
+                                             (pred['away'], lp[2], base[2])]:
+                            d = (lv - bp) * 100
+                            arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
+                            st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
+                    else:
+                        st.caption("_Live odds unavailable for this match._")
 
         st.divider()
 

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-24 01:08:12.394389",
+  "generated": "2026-06-24 13:28:00.815441",
   "n_sims": 10000,
   "groups": {
     "A": [
@@ -521,7 +521,9 @@
         "away": "Czech Republic",
         "p_home": 0.694,
         "p_draw": 0.229,
-        "p_away": 0.077
+        "p_away": 0.077,
+        "lh": 1.633,
+        "la": 0.36
       },
       {
         "home": "Mexico",
@@ -542,7 +544,9 @@
         "away": "South Africa",
         "p_home": 0.594,
         "p_draw": 0.302,
-        "p_away": 0.104
+        "p_away": 0.104,
+        "lh": 1.241,
+        "la": 0.348
       },
       {
         "home": "Czech Republic",
@@ -558,7 +562,9 @@
         "away": "Switzerland",
         "p_home": 0.401,
         "p_draw": 0.359,
-        "p_away": 0.241
+        "p_away": 0.241,
+        "lh": 0.899,
+        "la": 0.623
       },
       {
         "home": "Canada",
@@ -593,7 +599,9 @@
         "away": "Qatar",
         "p_home": 0.479,
         "p_draw": 0.327,
-        "p_away": 0.194
+        "p_away": 0.194,
+        "lh": 1.091,
+        "la": 0.577
       }
     ],
     "C": [
@@ -616,14 +624,18 @@
         "away": "Scotland",
         "p_home": 0.617,
         "p_draw": 0.32,
-        "p_away": 0.063
+        "p_away": 0.063,
+        "lh": 1.157,
+        "la": 0.196
       },
       {
         "home": "Morocco",
         "away": "Haiti",
         "p_home": 0.879,
         "p_draw": 0.065,
-        "p_away": 0.056
+        "p_away": 0.056,
+        "lh": 4.783,
+        "la": 1.391
       },
       {
         "home": "Morocco",
@@ -660,14 +672,18 @@
         "away": "Turkey",
         "p_home": 0.525,
         "p_draw": 0.279,
-        "p_away": 0.196
+        "p_away": 0.196,
+        "lh": 1.375,
+        "la": 0.721
       },
       {
         "home": "Paraguay",
         "away": "Australia",
         "p_home": 0.396,
         "p_draw": 0.263,
-        "p_away": 0.341
+        "p_away": 0.341,
+        "lh": 1.365,
+        "la": 1.247
       },
       {
         "home": "Paraguay",
@@ -704,14 +720,18 @@
         "away": "Ecuador",
         "p_home": 0.581,
         "p_draw": 0.248,
-        "p_away": 0.171
+        "p_away": 0.171,
+        "lh": 1.609,
+        "la": 0.744
       },
       {
         "home": "Curaçao",
         "away": "Ivory Coast",
         "p_home": 0.074,
         "p_draw": 0.288,
-        "p_away": 0.639
+        "p_away": 0.639,
+        "lh": 0.262,
+        "la": 1.299
       },
       {
         "home": "Curaçao",
@@ -748,14 +768,18 @@
         "away": "Tunisia",
         "p_home": 0.906,
         "p_draw": 0.063,
-        "p_away": 0.031
+        "p_away": 0.031,
+        "lh": 3.977,
+        "la": 0.739
       },
       {
         "home": "Japan",
         "away": "Sweden",
         "p_home": 0.581,
         "p_draw": 0.247,
-        "p_away": 0.171
+        "p_away": 0.171,
+        "lh": 1.612,
+        "la": 0.745
       },
       {
         "home": "Japan",
@@ -792,14 +816,18 @@
         "away": "New Zealand",
         "p_home": 0.912,
         "p_draw": 0.059,
-        "p_away": 0.029
+        "p_away": 0.029,
+        "lh": 4.109,
+        "la": 0.752
       },
       {
         "home": "Egypt",
         "away": "Iran",
         "p_home": 0.298,
         "p_draw": 0.253,
-        "p_away": 0.449
+        "p_away": 0.449,
+        "lh": 1.196,
+        "la": 1.526
       },
       {
         "home": "Egypt",
@@ -836,14 +864,18 @@
         "away": "Uruguay",
         "p_home": 0.771,
         "p_draw": 0.169,
-        "p_away": 0.061
+        "p_away": 0.061,
+        "lh": 2.094,
+        "la": 0.411
       },
       {
         "home": "Cape Verde",
         "away": "Saudi Arabia",
         "p_home": 0.403,
         "p_draw": 0.273,
-        "p_away": 0.324
+        "p_away": 0.324,
+        "lh": 1.299,
+        "la": 1.135
       },
       {
         "home": "Cape Verde",
@@ -880,14 +912,18 @@
         "away": "Norway",
         "p_home": 0.531,
         "p_draw": 0.337,
-        "p_away": 0.133
+        "p_away": 0.133,
+        "lh": 1.084,
+        "la": 0.391
       },
       {
         "home": "Senegal",
         "away": "Iraq",
         "p_home": 0.644,
         "p_draw": 0.196,
-        "p_away": 0.16
+        "p_away": 0.16,
+        "lh": 2.168,
+        "la": 0.981
       },
       {
         "home": "Senegal",
@@ -924,14 +960,18 @@
         "away": "Jordan",
         "p_home": 0.729,
         "p_draw": 0.246,
-        "p_away": 0.026
+        "p_away": 0.026,
+        "lh": 1.446,
+        "la": 0.106
       },
       {
         "home": "Algeria",
         "away": "Austria",
         "p_home": 0.267,
         "p_draw": 0.23,
-        "p_away": 0.503
+        "p_away": 0.503,
+        "lh": 1.263,
+        "la": 1.813
       },
       {
         "home": "Algeria",
@@ -968,14 +1008,18 @@
         "away": "Colombia",
         "p_home": 0.24,
         "p_draw": 0.358,
-        "p_away": 0.402
+        "p_away": 0.402,
+        "lh": 0.622,
+        "la": 0.901
       },
       {
         "home": "DR Congo",
         "away": "Uzbekistan",
         "p_home": 0.339,
         "p_draw": 0.315,
-        "p_away": 0.346
+        "p_away": 0.346,
+        "lh": 0.961,
+        "la": 0.974
       },
       {
         "home": "DR Congo",
@@ -1012,14 +1056,18 @@
         "away": "Panama",
         "p_home": 0.882,
         "p_draw": 0.076,
-        "p_away": 0.041
+        "p_away": 0.041,
+        "lh": 3.776,
+        "la": 0.821
       },
       {
         "home": "Croatia",
         "away": "Ghana",
         "p_home": 0.79,
         "p_draw": 0.165,
-        "p_away": 0.045
+        "p_away": 0.045,
+        "lh": 2.046,
+        "la": 0.306
       },
       {
         "home": "Croatia",
@@ -1652,6 +1700,78 @@
     }
   },
   "stage_progress": {
+    "South Korea": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Uruguay": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Turkey": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Algeria": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Morocco": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Portugal": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Haiti": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Japan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Spain": {
+      "reached": null,
+      "eliminated": false
+    },
+    "DR Congo": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Uzbekistan": {
+      "reached": null,
+      "eliminated": false
+    },
+    "United States": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Ecuador": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Brazil": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Argentina": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Ivory Coast": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Netherlands": {
+      "reached": null,
+      "eliminated": false
+    },
+    "South Africa": {
+      "reached": null,
+      "eliminated": false
+    },
     "Curaçao": {
       "reached": null,
       "eliminated": false
@@ -1660,123 +1780,7 @@
       "reached": null,
       "eliminated": false
     },
-    "Switzerland": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Iraq": {
-      "reached": null,
-      "eliminated": false
-    },
-    "United States": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Uruguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Portugal": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Tunisia": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Austria": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Scotland": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Ivory Coast": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Morocco": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Cape Verde": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Brazil": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Belgium": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Czech Republic": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Netherlands": {
-      "reached": null,
-      "eliminated": false
-    },
     "Ghana": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Mexico": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Argentina": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Uzbekistan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Qatar": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Paraguay": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Iran": {
-      "reached": null,
-      "eliminated": false
-    },
-    "New Zealand": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Norway": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "Panama": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Egypt": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Canada": {
-      "reached": null,
-      "eliminated": false
-    },
-    "England": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Japan": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Senegal": {
       "reached": null,
       "eliminated": false
     },
@@ -1784,19 +1788,27 @@
       "reached": "R32",
       "eliminated": false
     },
-    "Turkey": {
+    "England": {
       "reached": null,
       "eliminated": false
     },
-    "Ecuador": {
+    "Panama": {
       "reached": null,
       "eliminated": false
     },
-    "Croatia": {
+    "Paraguay": {
       "reached": null,
       "eliminated": false
     },
-    "Jordan": {
+    "Scotland": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Switzerland": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Qatar": {
       "reached": null,
       "eliminated": false
     },
@@ -1804,35 +1816,19 @@
       "reached": "R32",
       "eliminated": false
     },
-    "Spain": {
+    "Jordan": {
       "reached": null,
       "eliminated": false
     },
-    "Algeria": {
+    "Iran": {
       "reached": null,
       "eliminated": false
     },
-    "South Africa": {
+    "Croatia": {
       "reached": null,
       "eliminated": false
     },
-    "Germany": {
-      "reached": "R32",
-      "eliminated": false
-    },
-    "DR Congo": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Bosnia and Herzegovina": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Haiti": {
-      "reached": null,
-      "eliminated": false
-    },
-    "Australia": {
+    "Czech Republic": {
       "reached": null,
       "eliminated": false
     },
@@ -1840,7 +1836,59 @@
       "reached": null,
       "eliminated": false
     },
-    "South Korea": {
+    "Norway": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "New Zealand": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Cape Verde": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Austria": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Belgium": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Canada": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Mexico": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Tunisia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Iraq": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Germany": {
+      "reached": "R32",
+      "eliminated": false
+    },
+    "Egypt": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Bosnia and Herzegovina": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Australia": {
+      "reached": null,
+      "eliminated": false
+    },
+    "Senegal": {
       "reached": null,
       "eliminated": false
     }

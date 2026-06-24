@@ -841,13 +841,63 @@ if os.path.exists('predictions.json'):
     except Exception:
         pass
 
+# ---- Live-odds prior: implied goal rates (lambdas) from pre-match W/D/L odds.
+# Find the Poisson scoring rates whose scoreline distribution reproduces the
+# pre-match odds, so the live model starts exactly at the baseline at minute 0. ----
+from math import exp, factorial
+try:
+    from scipy.optimize import minimize as _minimize
+    _HAVE_SCIPY = True
+except Exception:
+    _HAVE_SCIPY = False
+
+def _pois(k, lam):
+    return exp(-lam) * lam ** k / factorial(k)
+
+def _wdl_from_lambdas(lh, la, maxg=10):
+    """Independent-Poisson home/draw/away probabilities for given goal rates."""
+    hp = [_pois(i, lh) for i in range(maxg + 1)]
+    ap = [_pois(j, la) for j in range(maxg + 1)]
+    ph = pdr = pa = 0.0
+    for i in range(maxg + 1):
+        for j in range(maxg + 1):
+            p = hp[i] * ap[j]
+            if i > j: ph += p
+            elif i == j: pdr += p
+            else: pa += p
+    return ph, pdr, pa
+
+def implied_lambdas(p_home, p_draw, p_away):
+    """Invert pre-match odds -> (lambda_home, lambda_away) best reproducing them."""
+    def loss(x):
+        lh, la = x
+        if lh <= 0.02 or la <= 0.02 or lh > 6 or la > 6:
+            return 1e9
+        ph, pdr, pa = _wdl_from_lambdas(lh, la)
+        return (ph - p_home) ** 2 + (pdr - p_draw) ** 2 + (pa - p_away) ** 2
+    if _HAVE_SCIPY:
+        r = _minimize(loss, [1.3, 1.1], method='Nelder-Mead',
+                      options={'xatol': 1e-3, 'fatol': 1e-7})
+        lh, la = r.x
+    else:                                   # scipy-free fallback: coarse grid
+        best, lh, la = 1e9, 1.3, 1.1
+        grid = [0.1 + 0.05 * k for k in range(70)]
+        for x in grid:
+            for y in grid:
+                e = loss((x, y))
+                if e < best:
+                    best, lh, la = e, x, y
+    return max(0.05, round(lh, 3)), max(0.05, round(la, 3))
+
 def _gm_entry(h, a, ph, pd_, pa):
     pair = frozenset((h, a))
     if pair in _played_pairs and pair in _locked_gm:
-        return _locked_gm[pair]          # locked pre-game prediction
+        return _locked_gm[pair]          # locked pre-game prediction (game over)
+    lh, la = implied_lambdas(float(ph), float(pd_), float(pa))   # live-odds prior
     return {'home': h, 'away': a,
             'p_home': round(float(ph), 3), 'p_draw': round(float(pd_), 3),
-            'p_away': round(float(pa), 3)}
+            'p_away': round(float(pa), 3),
+            'lh': lh, 'la': la}
 
 # ---- Bracket export: tree structure + R32 confirmed flags + real KO winners ----
 # A team's R32 slot is "confirmed" once its group's 6 games are all played
