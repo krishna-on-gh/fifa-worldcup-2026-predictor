@@ -220,6 +220,25 @@ def estimate_minute(utc_kickoff, status):
     return int(round(minute)), max(0, 90 - minute)
 
 
+def render_live_probs(home, away, hs, as_, mins_left):
+    """Render the live win-probability lines for one match (live or preview).
+    Display-only and self-contained — never feeds the model's accuracy/track record."""
+    pred = pred_lookup.get(frozenset((home, away)))
+    if not (pred and 'lh' in pred):
+        st.caption("_Live model unavailable for this match._")
+        return
+    ohs, oas = (hs, as_) if home == pred['home'] else (as_, hs)   # orient to pred
+    lp = live_odds(ohs, oas, mins_left, pred['lh'], pred['la'])
+    base = (pred['p_home'], pred['p_draw'], pred['p_away'])
+    st.caption("Live win probability  ·  (pre-match)")
+    for name, lv, bp in [(pred['home'], lp[0], base[0]),
+                         ("Draw", lp[1], base[1]),
+                         (pred['away'], lp[2], base[2])]:
+        d = (lv - bp) * 100
+        arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
+        st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
+
+
 def _outcome(hs, as_):
     return 'home' if hs > as_ else ('away' if hs < as_ else 'draw')
 
@@ -337,35 +356,38 @@ with tab_games:
             st.subheader("🔴 Live now")
             live_games = [v for k, v in live.items()
                           if isinstance(v, dict) and v.get('status') in LIVE_STATUSES]
-            if not live_games:
-                st.write("_No matches in progress right now._")
-            for lg in live_games:
-                with st.container(border=True):
-                    st.markdown(f"### {lg['home']}  {lg['home_score']} – "
-                                f"{lg['away_score']}  {lg['away']}")
-                    minute, mins_left = estimate_minute(lg.get('utcDate'), lg.get('status'))
-                    when_tag = ("HT" if lg.get('status') == 'PAUSED'
-                                else (f"~{minute}'" if minute is not None else "live"))
-                    st.caption(f"🔴 {lg.get('status')} · {when_tag} (est.)")
-
-                    pred = pred_lookup.get(frozenset((lg['home'], lg['away'])))
-                    if pred and 'lh' in pred and lg.get('home_score') is not None:
-                        # orient the live score to the prediction's home/away
-                        if lg['home'] == pred['home']:
-                            hs, as_ = lg['home_score'], lg['away_score']
-                        else:
-                            hs, as_ = lg['away_score'], lg['home_score']
-                        lp = live_odds(hs, as_, mins_left, pred['lh'], pred['la'])
-                        base = (pred['p_home'], pred['p_draw'], pred['p_away'])
-                        st.caption("Live win probability  ·  (pre-match)")
-                        for name, lv, bp in [(pred['home'], lp[0], base[0]),
-                                             ("Draw", lp[1], base[1]),
-                                             (pred['away'], lp[2], base[2])]:
-                            d = (lv - bp) * 100
-                            arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
-                            st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
-                    else:
-                        st.caption("_Live odds unavailable for this match._")
+            if live_games:
+                for lg in live_games:                       # one model per live game
+                    with st.container(border=True):
+                        st.markdown(f"### {lg['home']}  {lg['home_score']} – "
+                                    f"{lg['away_score']}  {lg['away']}")
+                        minute, mins_left = estimate_minute(lg.get('utcDate'), lg.get('status'))
+                        tag = ("HT" if lg.get('status') == 'PAUSED'
+                               else (f"~{minute}'" if minute is not None else "live"))
+                        st.caption(f"🔴 {lg.get('status')} · {tag} (est.)")
+                        render_live_probs(lg['home'], lg['away'],
+                                          lg.get('home_score') or 0,
+                                          lg.get('away_score') or 0, mins_left)
+            else:
+                # No live games -> preview the next kickoff(s). Replaced by the live
+                # model automatically once a match starts.
+                nxt = None
+                if fixtures is not None and not fixtures.empty:
+                    future = fixtures[fixtures['dt'] > pd.Timestamp.now(tz='UTC')]
+                    if not future.empty:
+                        nxt = future[future['dt'] == future['dt'].min()]
+                if nxt is None or nxt.empty:
+                    st.write("_No matches in progress, and no upcoming fixtures found._")
+                else:
+                    st.caption("No match live right now — previewing the next kickoff "
+                               "(the live model takes over here once it starts).")
+                    for _, fx in nxt.iterrows():             # show both if two kick off together
+                        with st.container(border=True):
+                            when = (fx['dt'].tz_convert(ET).strftime('%b %d, %I:%M %p ET')
+                                    if pd.notna(fx['dt']) else fx['date'])
+                            st.markdown(f"### {fx['home']}  vs  {fx['away']}")
+                            st.caption(f"🕒 Preview · kicks off {when}")
+                            render_live_probs(fx['home'], fx['away'], 0, 0, 90)
 
         st.divider()
 
