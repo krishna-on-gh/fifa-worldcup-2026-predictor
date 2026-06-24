@@ -95,7 +95,8 @@ def norm(name):
 
 import time
 
-@st.cache_data(ttl=300)   # cache good data 5 min -> far fewer API calls (avoids rate limits)
+@st.cache_data(ttl=60)   # 60s: live odds stay fresh. Cache is shared across all
+                         # users (one fetch per window), so this is rate-limit safe.
 def _fetch_live_cached():
     """Fetch live scores, retrying transient drops. RAISES on hard failure so
     the failure is NOT cached and the next page load retries."""
