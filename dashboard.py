@@ -675,23 +675,14 @@ with tab_track:
 
     st.divider()
 
-    # --- Model updates / changelog (edit this list as you ship changes) ---
-    st.subheader("Model updates")
-    st.markdown("""
-**June 24, 2026**
-- **Full group-stage simulation** — R32 and advancement odds are now true probabilities (the remaining group games are simulated, not assumed to a fixed projected field).
-- **Track Record tab** — this page: prediction record, championship-odds-over-time, and this changelog.
-- **Live in-game win probability** — a Bayesian model that updates each match's odds in real time from the score and clock, with a next-game preview.
-
-**June 23, 2026**
-- **Clinch detection** — teams are flagged the moment they've mathematically secured a Round-of-32 spot.
-- **Goal-difference tiebreaks** — group standings break ties on actual GD, then goals scored.
-- **Real group stats** — added Games Played, Points, and GD columns plus a third-place race table.
-
-**June 22, 2026**
-- **Results-conditioned odds** — knockout results lock into the simulation, so eliminated teams drop to 0% and everyone else recomputes.
-- **Interactive bracket** — hover any team to trace its route to the final and see its stage odds.
-""")
+    # --- Model updates / changelog (edit CHANGELOG.md — it renders here) ---
+    _cl_path = _find('CHANGELOG.md')
+    if _cl_path:
+        with open(_cl_path, encoding='utf-8') as _f:
+            st.markdown(_f.read())
+    else:
+        st.subheader("Model updates")
+        st.caption("CHANGELOG.md not found.")
 
 
 # ===== TAB: About =====
