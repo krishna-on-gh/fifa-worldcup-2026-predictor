@@ -999,6 +999,9 @@ def _clinched_top2(group_teams):
 _clinched = set()
 for _g, _ts in groups.items():
     _clinched |= _clinched_top2(_ts)
+    if _group_done[_g]:        # group complete -> actual top 2 are final (GD tiebreaks settled)
+        _clinched.add(group_standings[_g][0][0])
+        _clinched.add(group_standings[_g][1][0])
 
 def _confirmed(t):
     return bool(t) and (t in _clinched or _group_done.get(_team_group.get(t), False))
