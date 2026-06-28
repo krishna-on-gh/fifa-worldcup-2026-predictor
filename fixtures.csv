@@ -1,76 +1,89 @@
 date,time_et,stage,home,away
-2026-06-18,21:00,Group A,Mexico,South Korea
-2026-06-24,21:00,Group A,Mexico,Czech Republic
-2026-06-11,15:00,Group A,Mexico,South Africa
-2026-06-11,22:00,Group A,South Korea,Czech Republic
-2026-06-24,21:00,Group A,South Korea,South Africa
-2026-06-18,12:00,Group A,Czech Republic,South Africa
-2026-06-24,15:00,Group B,Canada,Switzerland
-2026-06-12,15:00,Group B,Canada,Bosnia and Herzegovina
-2026-06-18,18:00,Group B,Canada,Qatar
-2026-06-18,15:00,Group B,Switzerland,Bosnia and Herzegovina
-2026-06-13,15:00,Group B,Switzerland,Qatar
-2026-06-24,15:00,Group B,Bosnia and Herzegovina,Qatar
-2026-06-13,18:00,Group C,Brazil,Morocco
-2026-06-19,20:30,Group C,Brazil,Haiti
-2026-06-24,18:00,Group C,Brazil,Scotland
-2026-06-24,18:00,Group C,Morocco,Haiti
-2026-06-19,18:00,Group C,Morocco,Scotland
-2026-06-13,21:00,Group C,Haiti,Scotland
-2026-06-12,21:00,Group D,United States,Paraguay
-2026-06-19,15:00,Group D,United States,Australia
-2026-06-25,22:00,Group D,United States,Turkey
-2026-06-25,22:00,Group D,Paraguay,Australia
-2026-06-19,23:00,Group D,Paraguay,Turkey
-2026-06-14,00:00,Group D,Australia,Turkey
-2026-06-14,13:00,Group E,Germany,Curaçao
-2026-06-20,16:00,Group E,Germany,Ivory Coast
-2026-06-25,16:00,Group E,Germany,Ecuador
-2026-06-25,16:00,Group E,Curaçao,Ivory Coast
-2026-06-20,20:00,Group E,Curaçao,Ecuador
-2026-06-14,19:00,Group E,Ivory Coast,Ecuador
-2026-06-14,16:00,Group F,Netherlands,Japan
-2026-06-20,13:00,Group F,Netherlands,Sweden
-2026-06-25,19:00,Group F,Netherlands,Tunisia
-2026-06-25,19:00,Group F,Japan,Sweden
-2026-06-21,00:00,Group F,Japan,Tunisia
-2026-06-14,22:00,Group F,Sweden,Tunisia
-2026-06-15,15:00,Group G,Belgium,Egypt
-2026-06-21,15:00,Group G,Belgium,Iran
-2026-06-26,23:00,Group G,Belgium,New Zealand
-2026-06-26,23:00,Group G,Egypt,Iran
-2026-06-21,21:00,Group G,Egypt,New Zealand
-2026-06-15,21:00,Group G,Iran,New Zealand
-2026-06-15,12:00,Group H,Spain,Cape Verde
-2026-06-21,12:00,Group H,Spain,Saudi Arabia
-2026-06-26,20:00,Group H,Spain,Uruguay
-2026-06-26,20:00,Group H,Cape Verde,Saudi Arabia
-2026-06-21,18:00,Group H,Cape Verde,Uruguay
-2026-06-15,18:00,Group H,Saudi Arabia,Uruguay
-2026-06-16,15:00,Group I,France,Senegal
-2026-06-22,17:00,Group I,France,Iraq
-2026-06-26,15:00,Group I,France,Norway
-2026-06-26,15:00,Group I,Senegal,Iraq
-2026-06-22,20:00,Group I,Senegal,Norway
-2026-06-16,18:00,Group I,Iraq,Norway
-2026-06-16,21:00,Group J,Argentina,Algeria
-2026-06-22,13:00,Group J,Argentina,Austria
-2026-06-27,22:00,Group J,Argentina,Jordan
-2026-06-27,22:00,Group J,Algeria,Austria
-2026-06-22,23:00,Group J,Algeria,Jordan
-2026-06-17,00:00,Group J,Austria,Jordan
-2026-06-17,13:00,Group K,Portugal,DR Congo
-2026-06-23,13:00,Group K,Portugal,Uzbekistan
-2026-06-27,19:30,Group K,Portugal,Colombia
-2026-06-27,19:30,Group K,DR Congo,Uzbekistan
-2026-06-23,22:00,Group K,DR Congo,Colombia
-2026-06-17,22:00,Group K,Uzbekistan,Colombia
-2026-06-17,16:00,Group L,England,Croatia
-2026-06-23,16:00,Group L,England,Ghana
-2026-06-27,17:00,Group L,England,Panama
-2026-06-27,17:00,Group L,Croatia,Ghana
-2026-06-23,19:00,Group L,Croatia,Panama
-2026-06-17,19:00,Group L,Ghana,Panama
-,,,,
-,,,,
-,,,,
+6/18/2026,21:00,Group A,Mexico,South Korea
+6/24/2026,21:00,Group A,Mexico,Czech Republic
+6/11/2026,15:00,Group A,Mexico,South Africa
+6/11/2026,22:00,Group A,South Korea,Czech Republic
+6/24/2026,21:00,Group A,South Korea,South Africa
+6/18/2026,12:00,Group A,Czech Republic,South Africa
+6/24/2026,15:00,Group B,Canada,Switzerland
+6/12/2026,15:00,Group B,Canada,Bosnia and Herzegovina
+6/18/2026,18:00,Group B,Canada,Qatar
+6/18/2026,15:00,Group B,Switzerland,Bosnia and Herzegovina
+6/13/2026,15:00,Group B,Switzerland,Qatar
+6/24/2026,15:00,Group B,Bosnia and Herzegovina,Qatar
+6/13/2026,18:00,Group C,Brazil,Morocco
+6/19/2026,20:30,Group C,Brazil,Haiti
+6/24/2026,18:00,Group C,Brazil,Scotland
+6/24/2026,18:00,Group C,Morocco,Haiti
+6/19/2026,18:00,Group C,Morocco,Scotland
+6/13/2026,21:00,Group C,Haiti,Scotland
+6/12/2026,21:00,Group D,United States,Paraguay
+6/19/2026,15:00,Group D,United States,Australia
+6/25/2026,22:00,Group D,United States,Turkey
+6/25/2026,22:00,Group D,Paraguay,Australia
+6/19/2026,23:00,Group D,Paraguay,Turkey
+6/14/2026,0:00,Group D,Australia,Turkey
+6/14/2026,13:00,Group E,Germany,Curaçao
+6/20/2026,16:00,Group E,Germany,Ivory Coast
+6/25/2026,16:00,Group E,Germany,Ecuador
+6/25/2026,16:00,Group E,Curaçao,Ivory Coast
+6/20/2026,20:00,Group E,Curaçao,Ecuador
+6/14/2026,19:00,Group E,Ivory Coast,Ecuador
+6/14/2026,16:00,Group F,Netherlands,Japan
+6/20/2026,13:00,Group F,Netherlands,Sweden
+6/25/2026,19:00,Group F,Netherlands,Tunisia
+6/25/2026,19:00,Group F,Japan,Sweden
+6/21/2026,0:00,Group F,Japan,Tunisia
+6/14/2026,22:00,Group F,Sweden,Tunisia
+6/15/2026,15:00,Group G,Belgium,Egypt
+6/21/2026,15:00,Group G,Belgium,Iran
+6/26/2026,23:00,Group G,Belgium,New Zealand
+6/26/2026,23:00,Group G,Egypt,Iran
+6/21/2026,21:00,Group G,Egypt,New Zealand
+6/15/2026,21:00,Group G,Iran,New Zealand
+6/15/2026,12:00,Group H,Spain,Cape Verde
+6/21/2026,12:00,Group H,Spain,Saudi Arabia
+6/26/2026,20:00,Group H,Spain,Uruguay
+6/26/2026,20:00,Group H,Cape Verde,Saudi Arabia
+6/21/2026,18:00,Group H,Cape Verde,Uruguay
+6/15/2026,18:00,Group H,Saudi Arabia,Uruguay
+6/16/2026,15:00,Group I,France,Senegal
+6/22/2026,17:00,Group I,France,Iraq
+6/26/2026,15:00,Group I,France,Norway
+6/26/2026,15:00,Group I,Senegal,Iraq
+6/22/2026,20:00,Group I,Senegal,Norway
+6/16/2026,18:00,Group I,Iraq,Norway
+6/16/2026,21:00,Group J,Argentina,Algeria
+6/22/2026,13:00,Group J,Argentina,Austria
+6/27/2026,22:00,Group J,Argentina,Jordan
+6/27/2026,22:00,Group J,Algeria,Austria
+6/22/2026,23:00,Group J,Algeria,Jordan
+6/17/2026,0:00,Group J,Austria,Jordan
+6/17/2026,13:00,Group K,Portugal,DR Congo
+6/23/2026,13:00,Group K,Portugal,Uzbekistan
+6/27/2026,19:30,Group K,Portugal,Colombia
+6/27/2026,19:30,Group K,DR Congo,Uzbekistan
+6/23/2026,22:00,Group K,DR Congo,Colombia
+6/17/2026,22:00,Group K,Uzbekistan,Colombia
+6/17/2026,16:00,Group L,England,Croatia
+6/23/2026,16:00,Group L,England,Ghana
+6/27/2026,17:00,Group L,England,Panama
+6/27/2026,17:00,Group L,Croatia,Ghana
+6/23/2026,19:00,Group L,Croatia,Panama
+6/17/2026,19:00,Group L,Ghana,Panama
+6/28/2026,15:00,Round of 32,Canada,South Africa
+6/29/2026,13:00,Round of 32,Brazil,Japan
+6/29/2026,16:30,Round of 32,Germany,Paraguay
+6/29/2026,21:00,Round of 32,Netherlands,Morocco
+6/30/2026,13:00,Round of 32,Ivory Coast,Norway
+6/30/2026,17:00,Round of 32,France,Sweden
+6/30/2026,21:00,Round of 32,Mexico,Ecuador
+7/1/2026,12:00,Round of 32,England,DR Congo
+7/1/2026,16:00,Round of 32,Belgium,Senegal
+7/1/2026,20:00,Round of 32,United States,Bosnia and Herzegovina
+7/2/2026,15:00,Round of 32,Spain,Austria
+7/2/2026,19:00,Round of 32,Portugal,Croatia
+7/2/2026,23:00,Round of 32,Switzerland,Algeria
+7/3/2026,14:00,Round of 32,Australia,Egypt
+7/3/2026,18:00,Round of 32,Argentina,Cape Verde
+7/3/2026,21:30,Round of 32,Colombia,Ghana
