@@ -708,14 +708,24 @@ ROUNDS = [
 _ko_lookup = {}
 for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
     _ko_lookup[frozenset((_r.home_team, _r.away_team))] = (
-        _r.home_team, _r.away_team, _r.home_score, _r.away_score)
+        _r.home_team, _r.away_team, _r.home_score, _r.away_score,
+        getattr(_r, 'winner', None))           # HOME_TEAM/AWAY_TEAM/DRAW (for shootouts)
 def _ko_win(a, b):
     if not a or not b:
         return None
     g = _ko_lookup.get(frozenset((a, b)))
-    if not g or g[2] == g[3]:        # not played, or draw (penalties unknown)
+    if not g:
         return None
-    return g[0] if g[2] > g[3] else g[1]
+    home, away, hs, as_, wf = g
+    if hs > as_:
+        return home
+    if as_ > hs:
+        return away
+    if wf == 'HOME_TEAM':            # level after ET -> decided on penalties
+        return home
+    if wf == 'AWAY_TEAM':
+        return away
+    return None                       # genuine draw or result unknown
 FORCED = {}           # match id -> real winner (forced into every simulation)
 _fk = {}
 for _m, (_a, _b) in R32.items():
@@ -1015,17 +1025,27 @@ for _g, _ts in groups.items():
 def _confirmed(t):
     return bool(t) and (t in _clinched or _group_done.get(_team_group.get(t), False))
 
-_res_lookup = {}   # frozenset(pair) -> (home, away, home_score, away_score)
+_res_lookup = {}   # frozenset(pair) -> (home, away, home_score, away_score, winner)
 for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
     _res_lookup[frozenset((_r.home_team, _r.away_team))] = (
-        _r.home_team, _r.away_team, _r.home_score, _r.away_score)
+        _r.home_team, _r.away_team, _r.home_score, _r.away_score,
+        getattr(_r, 'winner', None))
 def _real_winner(a, b):
     if not a or not b:
         return None
     g = _res_lookup.get(frozenset((a, b)))
-    if not g or g[2] == g[3]:        # not played, or draw (penalties unknown)
+    if not g:
         return None
-    return g[0] if g[2] > g[3] else g[1]
+    home, away, hs, as_, wf = g
+    if hs > as_:
+        return home
+    if as_ > hs:
+        return away
+    if wf == 'HOME_TEAM':            # level after ET -> decided on penalties
+        return home
+    if wf == 'AWAY_TEAM':
+        return away
+    return None
 
 _feeders = {}
 _parent = {}                       # match id -> match its winner advances into

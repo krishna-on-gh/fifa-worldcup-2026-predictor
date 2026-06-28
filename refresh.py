@@ -72,6 +72,8 @@ def fetch_finished():
             'tournament': 'FIFA World Cup', 'city': '', 'country': '',
             # dataset convention: host plays "home" (non-neutral), everyone else neutral
             'neutral': h not in HOSTS,
+            # who advanced (incl. extra time / penalties): HOME_TEAM / AWAY_TEAM / DRAW
+            'winner': (m.get('score') or {}).get('winner'),
         })
     return pd.DataFrame(rows)
 
@@ -86,6 +88,8 @@ def main():
         return
 
     res = pd.read_csv(RESULTS)
+    if 'winner' not in res.columns:
+        res['winner'] = ''                     # advancer flag (for KO shootouts/ET)
     res_dt = pd.to_datetime(res['date'], errors='coerce')
 
     filled, skipped, appended = [], 0, []
@@ -109,9 +113,13 @@ def main():
             if res.at[idx, 'home_team'] == m['home_team']:
                 res.at[idx, 'home_score'] = m['home_score']
                 res.at[idx, 'away_score'] = m['away_score']
+                res.at[idx, 'winner'] = m['winner']
             else:                              # row stores the pairing flipped
                 res.at[idx, 'home_score'] = m['away_score']
                 res.at[idx, 'away_score'] = m['home_score']
+                _w = m['winner']               # flip the advancer flag to match row order
+                res.at[idx, 'winner'] = ('AWAY_TEAM' if _w == 'HOME_TEAM'
+                                         else 'HOME_TEAM' if _w == 'AWAY_TEAM' else _w)
             filled.append((res.at[idx, 'date'], res.at[idx, 'home_team'],
                            int(res.at[idx, 'home_score']), int(res.at[idx, 'away_score']),
                            res.at[idx, 'away_team']))
