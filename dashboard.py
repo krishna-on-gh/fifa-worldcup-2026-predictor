@@ -173,9 +173,9 @@ live = fetch_live()
 
 st.caption(f"Odds from {data['n_sims']:,} Monte Carlo simulations")
 
-tab_games, tab_groups, tab_runs, tab_champ, tab_track, tab_about = st.tabs(
-    ["📅 Game by Game", "🗂️ Groups", "📈 Run to the final", "🏆 Championship odds",
-     "📋 Track record", "About/Methodology"]
+tab_games, tab_runs, tab_champ, tab_track, tab_groups, tab_about = st.tabs(
+    ["📅 Game by Game", "📈 Run to the final", "🏆 Championship odds",
+     "📋 Track record", "🗂️ Groups", "About/Methodology"]
 )
 
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
@@ -359,17 +359,45 @@ with tab_games:
         elif '_error' in live:
             st.warning(f"Live scores unavailable: {live['_error']}")
 
-        # ---- Model accuracy scoreboard (completed games so far) ----
-        graded = [(p, a) for _, fx in fixtures.iterrows()
-                  for done, p, a in [fixture_result(fx, live.get(frozenset((fx['home'], fx['away']))))]
-                  if done and p is not None]
-        total = len(graded)
-        correct = sum(p == a for p, a in graded)
+        # ---- Accuracy scoreboard: group stage (frozen) + Round of 32 (live) ----
+        # Group stage: frozen final record from the predictor's track record.
+        gtr = data.get('track_record', [])
+        g_correct, g_total = sum(1 for r in gtr if r['correct']), len(gtr)
+
+        # Round of 32: grade completed R32 fixtures by who ADVANCED (binary).
+        def _ko_correct(fx):
+            li = live.get(frozenset((fx['home'], fx['away'])))
+            pred = pred_lookup.get(frozenset((fx['home'], fx['away'])))
+            if not (li and li.get('home_score') is not None):
+                return None
+            if li.get('status') in LIVE_STATUSES or not (pred and 'p_home_adv' in pred):
+                return None
+            home, away = fx['home'], fx['away']
+            hs, as_ = ((li['home_score'], li['away_score']) if li.get('home') == home
+                       else (li['away_score'], li['home_score']))
+            adv_h, adv_a = ((pred['p_home_adv'], pred['p_away_adv']) if pred['home'] == home
+                            else (pred['p_away_adv'], pred['p_home_adv']))
+            pick = home if adv_h >= adv_a else away
+            if hs > as_:
+                actual = home
+            elif as_ > hs:
+                actual = away
+            else:
+                wf = li.get('winner')
+                actual = (li.get('home') if wf == 'HOME_TEAM'
+                          else li.get('away') if wf == 'AWAY_TEAM' else None)
+            return None if actual is None else (pick == actual)
+
+        r32_fx = fixtures[fixtures['stage'].str.strip() == 'Round of 32'] \
+            if 'stage' in fixtures.columns else fixtures.iloc[0:0]
+        r32_res = [c for _, fx in r32_fx.iterrows() for c in [_ko_correct(fx)] if c is not None]
+        r_correct, r_total = sum(r32_res), len(r32_res)
+
         m1, m2 = st.columns(2)
-        m1.metric("Model accuracy so far", f"{correct/total:.0%}" if total else "—")
-        m2.metric("Games graded", f"{correct}/{total}" if total else "0")
-        if not total:
-            st.caption("No completed games with predictions yet — accuracy fills in as games finish.")
+        m1.metric("Group stage accuracy", f"{g_correct/g_total:.0%}" if g_total else "—",
+                  help=f"{g_correct}/{g_total} — frozen final group-stage record")
+        m2.metric("Round of 32 accuracy", f"{r_correct/r_total:.0%}" if r_total else "—",
+                  help=f"{r_correct}/{r_total} games graded so far")
         st.divider()
 
         today = datetime.now(ET).date()
