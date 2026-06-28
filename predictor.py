@@ -651,8 +651,17 @@ print(f"\nQualifiers: 32 (12 winners, 12 runners-up, 8 best thirds)")
 # Each third-place slot can only take a third from a fixed set of groups.
 THIRD_SLOTS = {74: set('ABCDF'), 77: set('CDFGH'), 79: set('CEFHI'), 80: set('EHIJK'),
                81: set('BEFIJ'), 82: set('AEHIJ'), 85: set('EFGIJ'), 87: set('DEIJL')}
+# FIFA assigns the 8 best thirds via a predetermined official table. The allowed-sets
+# above permit several valid matchings, so generic bipartite matching can pick a
+# different (still-legal) one than FIFA's. Pin the OFFICIAL assignment per combination.
+OFFICIAL_THIRD_ALLOC = {
+    frozenset('BDEFIJKL'): {74: 'D', 77: 'F', 79: 'E', 80: 'K',
+                            81: 'B', 82: 'I', 85: 'J', 87: 'L'},
+}
 def _assign_thirds(groups_in):
-    """Bipartite matching: each qualifying third-group -> a slot whose set allows it."""
+    """Official table if the combination is known, else bipartite matching."""
+    if frozenset(groups_in) in OFFICIAL_THIRD_ALLOC:
+        return dict(OFFICIAL_THIRD_ALLOC[frozenset(groups_in)])
     match = {}   # slot -> group
     def aug(g, seen):
         for s, allowed in THIRD_SLOTS.items():
