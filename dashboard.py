@@ -359,12 +359,12 @@ with tab_games:
         elif '_error' in live:
             st.warning(f"Live scores unavailable: {live['_error']}")
 
-        # ---- Accuracy scoreboard: group stage (frozen) + Round of 32 (live) ----
+        # ---- Accuracy: overall (live) + group stage (frozen) + knockouts (live) ----
         # Group stage: frozen final record from the predictor's track record.
         gtr = data.get('track_record', [])
         g_correct, g_total = sum(1 for r in gtr if r['correct']), len(gtr)
 
-        # Round of 32: grade completed R32 fixtures by who ADVANCED (binary).
+        # Grade a completed knockout fixture by who ADVANCED (binary).
         def _ko_correct(fx):
             li = live.get(frozenset((fx['home'], fx['away'])))
             pred = pred_lookup.get(frozenset((fx['home'], fx['away'])))
@@ -388,16 +388,18 @@ with tab_games:
                           else li.get('away') if wf == 'AWAY_TEAM' else None)
             return None if actual is None else (pick == actual)
 
-        r32_fx = fixtures[fixtures['stage'].str.strip() == 'Round of 32'] \
-            if 'stage' in fixtures.columns else fixtures.iloc[0:0]
-        r32_res = [c for _, fx in r32_fx.iterrows() for c in [_ko_correct(fx)] if c is not None]
-        r_correct, r_total = sum(r32_res), len(r32_res)
+        # Knockouts: grade every completed KO game (R32 → Final) by who advanced.
+        # _ko_correct self-filters to KO games (only those have 'p_home_adv').
+        ko_res = [c for _, fx in fixtures.iterrows() for c in [_ko_correct(fx)] if c is not None]
+        k_correct, k_total = sum(ko_res), len(ko_res)
+        o_correct, o_total = g_correct + k_correct, g_total + k_total   # every game
 
-        m1, m2 = st.columns(2)
-        m1.metric("Group stage accuracy", f"{g_correct/g_total:.0%}" if g_total else "—",
-                  help=f"{g_correct}/{g_total} — frozen final group-stage record")
-        m2.metric("Round of 32 accuracy", f"{r_correct/r_total:.0%}" if r_total else "—",
-                  help=f"{r_correct}/{r_total} games graded so far")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Overall accuracy", f"{o_correct/o_total:.0%}" if o_total else "—")
+        c2.metric("Group stage", f"{g_correct/g_total:.0%}" if g_total else "—")
+        c3.metric("Knockouts", f"{k_correct/k_total:.0%}" if k_total else "—")
+        st.caption(f"Overall **{o_correct}/{o_total}**  ·  Group stage {g_correct}/{g_total} (frozen)  "
+                   f"·  Knockouts {k_correct}/{k_total} (R32 → Final)")
         st.divider()
 
         today = datetime.now(ET).date()
