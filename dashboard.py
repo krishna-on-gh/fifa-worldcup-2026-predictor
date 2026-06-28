@@ -181,6 +181,45 @@ tab_games, tab_runs, tab_champ, tab_track, tab_groups, tab_about = st.tabs(
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
 
 
+# ----- Shared accuracy record: group stage (frozen) + knockouts (live) -----
+# Computed once here so the Game-by-Game and Track Record tabs always agree.
+def _ko_record(fx):
+    """Full record for a COMPLETED knockout game (graded by who advanced), else None."""
+    home, away = fx['home'], fx['away']
+    li = live.get(frozenset((home, away)))
+    pred = pred_lookup.get(frozenset((home, away)))
+    if not (li and li.get('home_score') is not None):
+        return None
+    if li.get('status') in LIVE_STATUSES or not (pred and 'p_home_adv' in pred):
+        return None
+    hs, as_ = ((li['home_score'], li['away_score']) if li.get('home') == home
+               else (li['away_score'], li['home_score']))
+    adv_h, adv_a = ((pred['p_home_adv'], pred['p_away_adv']) if pred['home'] == home
+                    else (pred['p_away_adv'], pred['p_home_adv']))
+    pick = home if adv_h >= adv_a else away
+    if hs > as_:
+        actual = home
+    elif as_ > hs:
+        actual = away
+    else:
+        wf = li.get('winner')
+        actual = (li.get('home') if wf == 'HOME_TEAM'
+                  else li.get('away') if wf == 'AWAY_TEAM' else None)
+    if actual is None:
+        return None
+    return {'date': fx.get('date', ''), 'home': home, 'away': away,
+            'score': f'{int(hs)}-{int(as_)}', 'pred': pick, 'actual': actual,
+            'correct': pick == actual, 'stage': fx.get('stage', 'Knockout')}
+
+
+_group_rec = data.get('track_record', [])                  # frozen group-stage record
+_ko_rec = ([r for _, fx in fixtures.iterrows() for r in [_ko_record(fx)] if r]
+           if fixtures is not None and not fixtures.empty else [])
+g_correct, g_total = sum(1 for r in _group_rec if r['correct']), len(_group_rec)
+k_correct, k_total = sum(1 for r in _ko_rec if r['correct']), len(_ko_rec)
+o_correct, o_total = g_correct + k_correct, g_total + k_total
+
+
 # ----- Live (in-game) win probability: Bayesian update of pre-match odds -----
 def _pois_pmf(k, lam):
     return math.exp(-lam) * lam ** k / math.factorial(k)
@@ -360,40 +399,7 @@ with tab_games:
             st.warning(f"Live scores unavailable: {live['_error']}")
 
         # ---- Accuracy: overall (live) + group stage (frozen) + knockouts (live) ----
-        # Group stage: frozen final record from the predictor's track record.
-        gtr = data.get('track_record', [])
-        g_correct, g_total = sum(1 for r in gtr if r['correct']), len(gtr)
-
-        # Grade a completed knockout fixture by who ADVANCED (binary).
-        def _ko_correct(fx):
-            li = live.get(frozenset((fx['home'], fx['away'])))
-            pred = pred_lookup.get(frozenset((fx['home'], fx['away'])))
-            if not (li and li.get('home_score') is not None):
-                return None
-            if li.get('status') in LIVE_STATUSES or not (pred and 'p_home_adv' in pred):
-                return None
-            home, away = fx['home'], fx['away']
-            hs, as_ = ((li['home_score'], li['away_score']) if li.get('home') == home
-                       else (li['away_score'], li['home_score']))
-            adv_h, adv_a = ((pred['p_home_adv'], pred['p_away_adv']) if pred['home'] == home
-                            else (pred['p_away_adv'], pred['p_home_adv']))
-            pick = home if adv_h >= adv_a else away
-            if hs > as_:
-                actual = home
-            elif as_ > hs:
-                actual = away
-            else:
-                wf = li.get('winner')
-                actual = (li.get('home') if wf == 'HOME_TEAM'
-                          else li.get('away') if wf == 'AWAY_TEAM' else None)
-            return None if actual is None else (pick == actual)
-
-        # Knockouts: grade every completed KO game (R32 → Final) by who advanced.
-        # _ko_correct self-filters to KO games (only those have 'p_home_adv').
-        ko_res = [c for _, fx in fixtures.iterrows() for c in [_ko_correct(fx)] if c is not None]
-        k_correct, k_total = sum(ko_res), len(ko_res)
-        o_correct, o_total = g_correct + k_correct, g_total + k_total   # every game
-
+        # Uses the shared module-level record, so this matches the Track Record tab.
         c1, c2, c3 = st.columns(3)
         c1.metric("Overall accuracy", f"{o_correct/o_total:.0%}" if o_total else "—")
         c2.metric("Group stage", f"{g_correct/g_total:.0%}" if g_total else "—")
@@ -696,19 +702,17 @@ with tab_groups:
 with tab_track:
     st.subheader("How the model has done")
 
-    # --- Prediction record on completed games ---
-    tr = data.get('track_record', [])
-    if tr:
-        correct = sum(1 for r in tr if r['correct'])
-        total = len(tr)
+    # --- Prediction record on completed games (group + knockouts, same as Game-by-Game) ---
+    rec = _group_rec + _ko_rec
+    if rec:
         c1, c2 = st.columns(2)
-        c1.metric("Predictions correct", f"{correct}/{total}")
-        c2.metric("Hit rate", f"{correct / total:.0%}" if total else "—")
+        c1.metric("Predictions correct", f"{o_correct}/{o_total}")
+        c2.metric("Hit rate", f"{o_correct / o_total:.0%}" if o_total else "—")
         st.caption("The model's pre-match pick vs the actual result, for every completed game.")
         rows = [{'Date': r['date'], 'Match': f"{r['home']} {r['score']} {r['away']}",
                  'Predicted': r['pred'], 'Actual': r['actual'],
                  'Result': '✅' if r['correct'] else '❌', 'Stage': r['stage']}
-                for r in reversed(tr)]
+                for r in sorted(rec, key=lambda x: x['date'], reverse=True)]
         st.dataframe(pd.DataFrame(rows), hide_index=True,
                      use_container_width=True, height=420)
     else:
