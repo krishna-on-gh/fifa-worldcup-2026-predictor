@@ -683,8 +683,7 @@ def third_team(slot):
 _adv_cache = {}
 def advance_prob(a, b):
     if (a, b) not in _adv_cache:
-        host = a if a in HOSTS else (b if b in HOSTS else None)
-        p = predict_match(a, b, host_team=host)
+        p = predict_match(a, b, host_team=None)   # host advantage wears off after groups
         _adv_cache[(a, b)] = p[f'{a} win'] + 0.5 * p['draw']
     return _adv_cache[(a, b)]
 def _play(a, b):
@@ -954,6 +953,7 @@ _played_pairs = {frozenset((r['home_team'], r['away_team']))
                  for _, r in df[(df['tournament'] == 'FIFA World Cup')
                                 & (df['date'].dt.year == 2026)].iterrows()}
 _locked_gm = {}
+_locked_ko = {}                          # frozen pre-game predictions for played KO games
 _prev_history = []                       # championship-odds snapshots from prior runs
 if os.path.exists('predictions.json'):
     try:
@@ -962,6 +962,8 @@ if os.path.exists('predictions.json'):
             for _m in _ms:
                 _locked_gm[frozenset((_m['home'], _m['away']))] = _m
         _prev_history = _prev.get('odds_history', [])
+        for _km in _prev.get('knockout_matches', []):
+            _locked_ko[frozenset((_km['home'], _km['away']))] = _km
     except Exception:
         pass
 
@@ -1194,6 +1196,39 @@ if not _history or _history[-1].get('champ') != _champ_now:
     _history.append({'ts': str(pd.Timestamp.now()),
                      'n_played': len(_played_pairs), 'champ': _champ_now})
 export['odds_history'] = _history
+
+# ---- Per-game KNOCKOUT predictions (binary: someone always advances) ----
+# For every bracket matchup whose two teams are known, predict win/draw/loss,
+# convert to advance odds (P(advance) = P(win) + 0.5*P(draw)), and add lambdas
+# for the live model. Played games keep their frozen pre-game prediction.
+_round_label = {'QF': 'Round of 16', 'SF': 'Quarterfinal',
+                'Final': 'Semifinal', 'Champion': 'Final'}
+_ko_part = {_m: (R32[_m][0], R32[_m][1]) for _m in R32}
+_ko_stage = {_m: 'Round of 32' for _m in R32}
+for _stage, _ms in ROUNDS:
+    for _m, (_x, _y) in _ms.items():
+        _ko_part[_m] = (_bk_winners.get(_x), _bk_winners.get(_y))
+        _ko_stage[_m] = _round_label[_stage]
+_ko_matches = []
+for _m, (_a, _b) in _ko_part.items():
+    if not _a or not _b:
+        continue                                  # participants not decided yet
+    _pair = frozenset((_a, _b))
+    if _ko_lookup.get(_pair) is not None and _pair in _locked_ko:
+        _ko_matches.append(_locked_ko[_pair])     # freeze pre-game prediction
+        continue
+    _p = predict_match(_a, _b, host_team=None)    # host advantage wears off after groups
+    _ph, _pdr, _pa = _p[f'{_a} win'], _p['draw'], _p[f'{_b} win']
+    _lh, _la = implied_lambdas(_ph, _pdr, _pa)
+    _ko_matches.append({
+        'match': _m, 'stage': _ko_stage[_m], 'home': _a, 'away': _b,
+        'p_home': round(float(_ph), 3), 'p_draw': round(float(_pdr), 3),
+        'p_away': round(float(_pa), 3),
+        'p_home_adv': round(float(_ph + 0.5 * _pdr), 3),
+        'p_away_adv': round(float(_pa + 0.5 * _pdr), 3),
+        'lh': _lh, 'la': _la,
+    })
+export['knockout_matches'] = _ko_matches
 
 with open('predictions.json', 'w', encoding='utf-8') as f:
     json.dump(export, f, indent=2, ensure_ascii=False)

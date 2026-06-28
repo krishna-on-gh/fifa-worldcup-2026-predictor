@@ -121,6 +121,7 @@ def _fetch_live_cached():
                     'status': m.get('status'), 'home': h, 'away': a,
                     'home_score': ft.get('home'), 'away_score': ft.get('away'),
                     'utcDate': m.get('utcDate'),
+                    'winner': (m.get('score') or {}).get('winner'),  # advancer (ET/pens)
                 }
             return out
         except Exception as e:
@@ -159,11 +160,13 @@ if data is None:
     st.error("Could not find predictions.json. Run `python predictor.py` first.")
     st.stop()
 
-# Prediction lookup: frozenset({home,away}) -> (p_home, p_draw, p_away, home, away)
+# Prediction lookup: frozenset({home,away}) -> match prediction entry
 pred_lookup = {}
 for g, matches in data['group_matches'].items():
     for m in matches:
         pred_lookup[frozenset((m['home'], m['away']))] = m
+for m in data.get('knockout_matches', []):          # R32+ matchups (binary: someone advances)
+    pred_lookup[frozenset((m['home'], m['away']))] = m
 
 fixtures = load_fixtures()
 live = fetch_live()
@@ -231,14 +234,24 @@ def render_live_probs(home, away, hs, as_, mins_left):
         return
     ohs, oas = (hs, as_) if home == pred['home'] else (as_, hs)   # orient to pred
     lp = live_odds(ohs, oas, mins_left, pred['lh'], pred['la'])
-    base = (pred['p_home'], pred['p_draw'], pred['p_away'])
-    st.caption("Live win probability  ·  (pre-match)")
-    for name, lv, bp in [(pred['home'], lp[0], base[0]),
-                         ("Draw", lp[1], base[1]),
-                         (pred['away'], lp[2], base[2])]:
-        d = (lv - bp) * 100
-        arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
-        st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
+    if 'p_home_adv' in pred:        # knockout: binary (fold the draw 50/50 into advance)
+        adv_h, adv_a = lp[0] + 0.5 * lp[1], lp[2] + 0.5 * lp[1]
+        st.caption("Live chance to advance  ·  (pre-match)")
+        for name, lv, bp in [(pred['home'], adv_h, pred['p_home_adv']),
+                             (pred['away'], adv_a, pred['p_away_adv'])]:
+            d = (lv - bp) * 100
+            arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
+            st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
+        st.caption(f"_{lp[1]:.0%} chance still level → penalties_")
+    else:
+        base = (pred['p_home'], pred['p_draw'], pred['p_away'])
+        st.caption("Live win probability  ·  (pre-match)")
+        for name, lv, bp in [(pred['home'], lp[0], base[0]),
+                             ("Draw", lp[1], base[1]),
+                             (pred['away'], lp[2], base[2])]:
+            d = (lv - bp) * 100
+            arrow = "🔺" if d > 0.5 else ("🔻" if d < -0.5 else "▪")
+            st.write(f"{arrow} **{name}**  {lv:.0%}  _({bp:.0%})_")
 
 
 def _outcome(hs, as_):
@@ -299,7 +312,20 @@ def render_match_card(fx_row, live_info, show_pred=True):
             st.caption(f"{stage} · {when} · 🔴 LIVE")
         else:  # completed
             line = f"{stage} · {when} · 🏁 FINAL"
-            if pred_out is not None:
+            if pred and 'p_home_adv' in pred:        # knockout: grade by who advanced
+                adv_pick = home if (ph + 0.5 * pd_) >= (pa + 0.5 * pd_) else away
+                if hs > as_:
+                    actual_adv = home
+                elif as_ > hs:
+                    actual_adv = away
+                else:                                 # level -> use advancer flag (pens)
+                    wf = live_info.get('winner')
+                    actual_adv = (live_info.get('home') if wf == 'HOME_TEAM'
+                                  else live_info.get('away') if wf == 'AWAY_TEAM' else None)
+                if actual_adv:
+                    line += "  ·  model ✅ called it" if adv_pick == actual_adv \
+                            else "  ·  model ❌ missed"
+            elif pred_out is not None:
                 line += "  ·  model ✅ called it" if pred_out == _outcome(hs, as_) \
                         else "  ·  model ❌ missed"
             st.caption(line)
@@ -308,8 +334,14 @@ def render_match_card(fx_row, live_info, show_pred=True):
         st.caption(f"{stage} · {when} · ⏳ scheduled")
 
     if show_pred and ph is not None:
-        pick = {'home': home, 'draw': 'draw', 'away': away}[pred_out]
-        st.caption(f"Model: {home} {ph:.0%} · draw {pd_:.0%} · {away} {pa:.0%}  ·  pick: **{pick}**")
+        if pred and 'p_home_adv' in pred:        # knockout: binary (someone advances)
+            adv_h, adv_a = ph + 0.5 * pd_, pa + 0.5 * pd_
+            pick = home if adv_h >= adv_a else away
+            st.caption(f"Model: **{home} {adv_h:.0%}** vs **{away} {adv_a:.0%}** to advance  ·  "
+                       f"{pd_:.0%} chance of penalties  ·  pick: **{pick}**")
+        else:
+            pick = {'home': home, 'draw': 'draw', 'away': away}[pred_out]
+            st.caption(f"Model: {home} {ph:.0%} · draw {pd_:.0%} · {away} {pa:.0%}  ·  pick: **{pick}**")
 
 
 # ===== TAB: Game by Game =====
