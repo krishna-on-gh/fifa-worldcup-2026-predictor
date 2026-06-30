@@ -704,6 +704,13 @@ ROUNDS = [
 
 # ---- 5. Condition on REAL knockout results: a played KO game is a fact, not
 #         re-simulated. Eliminated teams fall to 0; everyone else recomputes. ----
+# Manual advancer overrides for knockout games the API records incompletely
+# (e.g., shootouts where it leaves winner=null / a tied score). Matchup -> team
+# that ADVANCED. Add an entry whenever the API can't tell us who went through.
+KO_OVERRIDES = {
+    frozenset(('Netherlands', 'Morocco')): 'Morocco',   # R32: Morocco won on pens
+}
+
 _ko_lookup = {}
 for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 2026)].itertuples():
     _ko_lookup[frozenset((_r.home_team, _r.away_team))] = (
@@ -712,6 +719,8 @@ for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 202
 def _ko_win(a, b):
     if not a or not b:
         return None
+    if frozenset((a, b)) in KO_OVERRIDES:      # manual override (API data missing)
+        return KO_OVERRIDES[frozenset((a, b))]
     g = _ko_lookup.get(frozenset((a, b)))
     if not g:
         return None
@@ -1035,6 +1044,8 @@ for _r in df[(df['tournament'] == 'FIFA World Cup') & (df['date'].dt.year == 202
 def _real_winner(a, b):
     if not a or not b:
         return None
+    if frozenset((a, b)) in KO_OVERRIDES:      # manual override (API data missing)
+        return KO_OVERRIDES[frozenset((a, b))]
     g = _res_lookup.get(frozenset((a, b)))
     if not g:
         return None

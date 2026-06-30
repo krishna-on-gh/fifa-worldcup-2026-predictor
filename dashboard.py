@@ -168,6 +168,15 @@ for g, matches in data['group_matches'].items():
 for m in data.get('knockout_matches', []):          # R32+ matchups (binary: someone advances)
     pred_lookup[frozenset((m['home'], m['away']))] = m
 
+# Predictor-resolved knockout advancers (override-aware; the API can leave shootout
+# winners blank, so we trust the predictor's bracket over the live feed for grading).
+ko_advancer = {}
+_bw = data.get('bracket', {}).get('winners', {})
+for m in data.get('knockout_matches', []):
+    w = _bw.get(str(m.get('match')))
+    if w:
+        ko_advancer[frozenset((m['home'], m['away']))] = w
+
 fixtures = load_fixtures()
 live = fetch_live()
 
@@ -197,14 +206,16 @@ def _ko_record(fx):
     adv_h, adv_a = ((pred['p_home_adv'], pred['p_away_adv']) if pred['home'] == home
                     else (pred['p_away_adv'], pred['p_home_adv']))
     pick = home if adv_h >= adv_a else away
-    if hs > as_:
-        actual = home
-    elif as_ > hs:
-        actual = away
-    else:
-        wf = li.get('winner')
-        actual = (li.get('home') if wf == 'HOME_TEAM'
-                  else li.get('away') if wf == 'AWAY_TEAM' else None)
+    actual = ko_advancer.get(frozenset((home, away)))    # predictor's resolution first
+    if actual is None:                                   # fall back to the live result
+        if hs > as_:
+            actual = home
+        elif as_ > hs:
+            actual = away
+        else:
+            wf = li.get('winner')
+            actual = (li.get('home') if wf == 'HOME_TEAM'
+                      else li.get('away') if wf == 'AWAY_TEAM' else None)
     if actual is None:
         return None
     return {'date': fx.get('date', ''), 'home': home, 'away': away,
