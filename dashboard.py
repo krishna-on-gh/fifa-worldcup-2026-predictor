@@ -188,6 +188,10 @@ tab_games, tab_runs, tab_champ, tab_track, tab_groups, tab_about = st.tabs(
 )
 
 LIVE_STATUSES = {'IN_PLAY', 'PAUSED', 'LIVE'}
+# A game only counts as finished when the API says so. Do NOT infer "final" from
+# "not live" — the free tier sometimes attaches a bogus fullTime score to a
+# TIMED/SCHEDULED (not-started) game, which must never render or grade as a result.
+FINAL_STATUSES = {'FINISHED', 'AWARDED'}
 
 
 # ----- Shared accuracy record: group stage (frozen) + knockouts (live) -----
@@ -197,9 +201,10 @@ def _ko_record(fx):
     home, away = fx['home'], fx['away']
     li = live.get(frozenset((home, away)))
     pred = pred_lookup.get(frozenset((home, away)))
-    if not (li and li.get('home_score') is not None):
+    if not (li and li.get('home_score') is not None
+            and li.get('status') in FINAL_STATUSES):
         return None
-    if li.get('status') in LIVE_STATUSES or not (pred and 'p_home_adv' in pred):
+    if not (pred and 'p_home_adv' in pred):
         return None
     hs, as_ = ((li['home_score'], li['away_score']) if li.get('home') == home
                else (li['away_score'], li['home_score']))
@@ -312,10 +317,9 @@ def fixture_result(fx_row, live_info):
     """For a fixture + its live data, return (completed, pred_out, actual_out).
        completed=True only for finished games; pred_out is None if no model line."""
     home, away = fx_row['home'], fx_row['away']
-    if not (live_info and live_info.get('home_score') is not None):
-        return False, None, None
-    if live_info.get('status') in LIVE_STATUSES:
-        return False, None, None      # still in progress, not final
+    if not (live_info and live_info.get('home_score') is not None
+            and live_info.get('status') in FINAL_STATUSES):
+        return False, None, None      # only a FINISHED game is a result
     if live_info.get('home') == home:
         hs, as_ = live_info['home_score'], live_info['away_score']
     else:
@@ -348,19 +352,24 @@ def render_match_card(fx_row, live_info, show_pred=True):
             ph, pd_, pa = pred['p_away'], pred['p_draw'], pred['p_home']
         pred_out = max((('home', ph), ('draw', pd_), ('away', pa)), key=lambda x: x[1])[0]
 
-    has_score = live_info and live_info.get('home_score') is not None
+    status = live_info.get('status', '') if live_info else ''
+    is_live = status in LIVE_STATUSES
+    is_final = status in FINAL_STATUSES
+    # Only trust a score once the game is actually live or finished. The API can
+    # attach a bogus fullTime score to a not-yet-started (TIMED) game — ignore it.
+    has_score = (live_info and live_info.get('home_score') is not None
+                 and (is_live or is_final))
     if has_score:
         # Orient the API score to the fixture's home/away
         if live_info.get('home') == home:
             hs, as_ = live_info['home_score'], live_info['away_score']
         else:
             hs, as_ = live_info['away_score'], live_info['home_score']
-        status = live_info.get('status', '')
         st.markdown(f"### {home}  {int(hs)} – {int(as_)}  {away}")
 
-        if status in LIVE_STATUSES:
+        if is_live:
             st.caption(f"{stage} · {when} · 🔴 LIVE")
-        else:  # completed
+        else:  # finished
             line = f"{stage} · {when} · 🏁 FINAL"
             if pred and 'p_home_adv' in pred:        # knockout: grade by who advanced
                 adv_pick = home if (ph + 0.5 * pd_) >= (pa + 0.5 * pd_) else away
