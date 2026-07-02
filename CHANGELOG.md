@@ -2,6 +2,7 @@
 
 A running log of updates to the FIFA World Cup 2026 prediction model and dashboard.
 Add a new dated section at the top each time you ship something.
+
 **June 28, 2026**
 - **R32 Fixtures bug fix** — R32 fixtures weren't proper before, so I redid them and manually hardcoded them in
 - **Host advantage removed** — Removed host advantage for Mexico, USA, and Canada for the knockouts
