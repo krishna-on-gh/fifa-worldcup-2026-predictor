@@ -180,6 +180,38 @@ for m in data.get('knockout_matches', []):
 fixtures = load_fixtures()
 live = fetch_live()
 
+# --- Manual corrections for games the free-tier API reports wrong ---
+# The feed occasionally posts an incorrect (sometimes impossible) knockout
+# result — e.g. a 2-2 "draw" in a round that can't end level. Record the true
+# result here; it overrides the live feed for BOTH display and grading.
+# frozenset(teams) -> (home_team, home_score, away_score, winner_flag)
+SCORE_OVERRIDES = {
+    frozenset(('Portugal', 'Croatia')): ('Portugal', 2, 1, 'HOME_TEAM'),
+}
+
+
+def _apply_score_overrides(live):
+    if not isinstance(live, dict):
+        return live
+    fixed = dict(live)
+    for teams, (h, hs, a_s, wf) in SCORE_OVERRIDES.items():
+        li = fixed.get(teams)
+        if not isinstance(li, dict):
+            continue
+        li = dict(li)                       # copy so we never mutate the cache
+        if li.get('home') == h:             # stored in the same orientation
+            li['home_score'], li['away_score'], li['winner'] = hs, a_s, wf
+        else:                               # stored flipped
+            li['home_score'], li['away_score'] = a_s, hs
+            li['winner'] = ('AWAY_TEAM' if wf == 'HOME_TEAM'
+                            else 'HOME_TEAM' if wf == 'AWAY_TEAM' else wf)
+        li['status'] = 'FINISHED'
+        fixed[teams] = li
+    return fixed
+
+
+live = _apply_score_overrides(live)
+
 st.caption(f"Odds from {data['n_sims']:,} Monte Carlo simulations")
 
 tab_games, tab_runs, tab_champ, tab_track, tab_groups, tab_about = st.tabs(
