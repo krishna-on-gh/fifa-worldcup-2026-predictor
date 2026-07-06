@@ -323,7 +323,8 @@ KO_HOST_BOOST = 44   # half strength in knockouts, applied ONLY at true home ven
 # from the match schedule). Used by BOTH the Monte Carlo sim and the match-card
 # export, so stage odds and per-game odds stay consistent.
 KO_HOST_HOME = {
-    frozenset(('Mexico', 'England')): 'Mexico',   # R16 at Estadio Azteca, Mexico City
+    frozenset(('Mexico', 'England')): 'Mexico',   # Round of 16 game at THE Azteca in Mexico City
+    frozenset(('United States', 'Belgium')): 'United States',  # Round of 16 at Seattle Stadium in Seattle, Washington, US
 }
 
 def predict_match(home, away, host_team=None, boost=None):
