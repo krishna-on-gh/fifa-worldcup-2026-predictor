@@ -790,17 +790,30 @@ with tab_track:
     st.subheader("Championship odds over time")
     hist = data.get('odds_history', [])
     if len(hist) >= 2:
-        latest = hist[-1]['champ']
-        top = [t for t, _ in sorted(latest.items(), key=lambda x: -x[1])[:6]]
+        # Every team we have history for. Each line tracks a team's title odds and
+        # drops to 0 the snapshot it's eliminated, then stops (NaN) so dead teams
+        # don't pile up as flat zero-lines.
+        all_teams = sorted({t for snap in hist for t in snap['champ']})
+        seen = {t: False for t in all_teams}   # has been in contention (>0)
+        done = {t: False for t in all_teams}   # already shown its drop to 0
         rows = []
         for snap in hist:
+            champ = snap['champ']
             row = {'Date': pd.to_datetime(snap['ts'])}
-            for t in top:
-                row[t] = round(snap['champ'].get(t, 0) * 100, 1)
+            for t in all_teams:
+                if done[t]:
+                    row[t] = None                       # eliminated earlier -> stop logging
+                elif champ.get(t, 0) > 0:
+                    row[t] = round(champ[t] * 100, 1); seen[t] = True
+                elif seen[t]:
+                    row[t] = 0.0; done[t] = True         # first snapshot out -> plot the 0
+                else:
+                    row[t] = None                       # not yet in contention
             rows.append(row)
         chart_df = pd.DataFrame(rows).set_index('Date')
         st.line_chart(chart_df, height=360)
-        st.caption("Title odds (%) for the current top 6, tracked over time as results came in.")
+        st.caption("Title odds (%) for every team — each line drops to 0 when the team is "
+                   "eliminated, then ends.")
     else:
         st.info("Need at least two odds updates to chart a trend — this builds up "
                 "as the tournament progresses.")
