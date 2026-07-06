@@ -319,6 +319,12 @@ print(importance)
 
 HOST_BOOST = 88   # calibrated from 1998+ World Cup host nations (was a guessed 75)
 KO_HOST_BOOST = 44   # half strength in knockouts, applied ONLY at true home venues
+# Knockout games where the host genuinely plays at a home-country venue (verified
+# from the match schedule). Used by BOTH the Monte Carlo sim and the match-card
+# export, so stage odds and per-game odds stay consistent.
+KO_HOST_HOME = {
+    frozenset(('Mexico', 'England')): 'Mexico',   # R16 at Estadio Azteca, Mexico City
+}
 
 def predict_match(home, away, host_team=None, boost=None):
     """
@@ -685,7 +691,8 @@ def third_team(slot):
 _adv_cache = {}
 def advance_prob(a, b):
     if (a, b) not in _adv_cache:
-        p = predict_match(a, b, host_team=None)   # host advantage wears off after groups
+        _host = KO_HOST_HOME.get(frozenset((a, b)))   # host boost only at true home venues
+        p = predict_match(a, b, host_team=_host, boost=KO_HOST_BOOST)
         _adv_cache[(a, b)] = p[f'{a} win'] + 0.5 * p['draw']
     return _adv_cache[(a, b)]
 def _play(a, b):
@@ -1278,11 +1285,6 @@ for _stage, _ms in ROUNDS:
     for _m, (_x, _y) in _ms.items():
         _ko_part[_m] = (_bk_winners.get(_x), _bk_winners.get(_y))
         _ko_stage[_m] = _round_label[_stage]
-# Host boost in knockouts applies ONLY when the host plays at a true home-country
-# venue (verified from the match schedule), at half strength (KO_HOST_BOOST).
-KO_HOST_HOME = {
-    frozenset(('Mexico', 'England')): 'Mexico',   # R16 at Estadio Azteca, Mexico City
-}
 _ko_matches = []
 for _m, (_a, _b) in _ko_part.items():
     if not _a or not _b:
