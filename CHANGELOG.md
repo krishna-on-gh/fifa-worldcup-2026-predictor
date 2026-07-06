@@ -6,6 +6,7 @@ Add a new dated section at the top each time you ship something.
 **July 5, 2026**
 - **Added host advantage back** — The Canada vs. Morocco game was played in the US so it doesn't impact that game. Every other game will have host advantage manually added before each game at 0.5 * Group Stage Host advantage.
 - **Strike through losers of all stages in 'Run to the Final' tab** — Initially only the losers in the R32 stage were crossed out, now it will extend to all stages (in theory) going forward.
+- **'Championship-odds over time' chart update** — Now includes all teams over time, instead of just Top 6 by odds, then falls to zero and stops logging for teams who are knocked out. 
 
 **June 28, 2026**
 - **R32 Fixtures bug fix** — R32 fixtures weren't proper before, so I redid them and manually hardcoded them in
