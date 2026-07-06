@@ -318,8 +318,9 @@ importance = pd.Series(
 print(importance)
 
 HOST_BOOST = 88   # calibrated from 1998+ World Cup host nations (was a guessed 75)
+KO_HOST_BOOST = 44   # half strength in knockouts, applied ONLY at true home venues
 
-def predict_match(home, away, host_team=None):
+def predict_match(home, away, host_team=None, boost=None):
     """
     Predict a single match.
     host_team: pass the name of a host nation (USA/Canada/Mexico) if THIS
@@ -335,12 +336,13 @@ def predict_match(home, away, host_team=None):
     away_squad = squad_strength(away)
 
     # Host-nation home advantage: nudge the host's Elo up, mark non-neutral
+    _boost = HOST_BOOST if boost is None else boost
     neutral = 1
     if host_team == home:
-        home_elo += HOST_BOOST   # calibrated from 1998+ World Cup hosts
+        home_elo += _boost   # calibrated from 1998+ World Cup hosts
         neutral = 0
     elif host_team == away:
-        away_elo += HOST_BOOST
+        away_elo += _boost
         neutral = 0
 
     # Build the single-row feature table in the SAME column order as training
@@ -840,6 +842,8 @@ for _, row in df.iterrows():
 
     bt_rows.append({
         'date': row['date'], 'tournament': row['tournament'],
+        'home_team': home, 'away_team': away,
+        'home_score': hs, 'away_score': as_,
         'home_elo': h_elo, 'away_elo': a_elo, 'elo_diff': h_elo - a_elo,
         'home_form': h_pts, 'away_form': a_pts,
         'home_gd_form': h_gd, 'away_gd_form': a_gd,
@@ -863,15 +867,65 @@ for _, row in df.iterrows():
 
 bt = pd.DataFrame(bt_rows)
 
+# --- knockout grading: match how the LIVE model scores knockouts ---
+# In the knockout rounds the model makes a BINARY call (who advances), not a
+# 3-way W/D/L call. So a game that went to penalties (recorded as a draw in the
+# score) must be graded on the advancer, not counted as a missed "draw" pick.
+_KO_START = {2014: '2014-06-28', 2018: '2018-06-30', 2022: '2022-12-03'}
+
+def _load_shootouts():
+    """Date+pairing -> shootout winner, for resolving penalty-decided KO games."""
+    for p in ('shootouts.csv', os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                             'shootouts.csv')):
+        try:
+            s = pd.read_csv(p)
+            s['date'] = pd.to_datetime(s['date'])
+            return {(r.date.date(), frozenset((r.home_team, r.away_team))): r.winner
+                    for r in s.itertuples()}
+        except FileNotFoundError:
+            continue
+    return {}
+_SHOOTOUTS = _load_shootouts()
+
+def _ko_advancer(g):
+    """Who actually advanced from knockout game `g` (row w/ scores, teams, date)."""
+    if g['home_score'] > g['away_score']:
+        return g['home_team']
+    if g['away_score'] > g['home_score']:
+        return g['away_team']
+    return _SHOOTOUTS.get((g['date'].date(),
+                           frozenset((g['home_team'], g['away_team']))))
+
+def _grade(wc, proba, pred3, ko_start):
+    """Accuracy the way the model is actually used: 3-way in groups, binary
+       (advance) in knockouts. Returns (overall_acc, ko_binary_acc, n_ko)."""
+    hits = ko_hits = ko_n = 0
+    rows = list(wc.iterrows())
+    for i, (_, g) in enumerate(rows):
+        if g['date'] < ko_start:                      # group stage -> 3-way
+            hits += int(pred3[i] == g['result'])
+            continue
+        p_away, _p_draw, p_home = proba[i]            # knockout -> binary advance
+        pick = g['home_team'] if p_home >= p_away else g['away_team']
+        adv = _ko_advancer(g)
+        if adv is None:                               # unresolved -> fall back 3-way
+            hits += int(pred3[i] == g['result'])
+            continue
+        ok = int(pick == adv)
+        hits += ok; ko_hits += ok; ko_n += 1
+    return hits / len(rows), (ko_hits / ko_n if ko_n else float('nan')), ko_n
+
 def backtest_wc(year, cutoff):
     """Train ONLY on matches before `cutoff`, predict that year's World Cup.
        Reports the RAW model and the CALIBRATED model side by side — both
-       trained/calibrated solely on pre-tournament data (no leakage)."""
+       trained/calibrated solely on pre-tournament data (no leakage).
+       Knockouts are graded BINARY (advancer), matching the live model."""
     from sklearn.calibration import CalibratedClassifierCV
     train = bt[bt['date'] < cutoff]
     wc = bt[(bt['tournament'] == 'FIFA World Cup') & (bt['date'].dt.year == year)]
     Xtr, ytr = train[feature_cols], train[target_col]
     Xwc, ywc = wc[feature_cols], wc[target_col]
+    ko_start = pd.Timestamp(_KO_START[year])
 
     cfg = dict(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.9,
                objective='multi:softprob', eval_metric='mlogloss', random_state=42)
@@ -879,19 +933,23 @@ def backtest_wc(year, cutoff):
     # Raw model
     m = XGBClassifier(**cfg)
     m.fit(Xtr, ytr)
-    acc_r = accuracy_score(ywc, m.predict(Xwc))
+    acc_r_3 = accuracy_score(ywc, m.predict(Xwc))
+    acc_r, ko_r, n_ko = _grade(wc, m.predict_proba(Xwc), m.predict(Xwc), ko_start)
     ll_r  = log_loss(ywc, m.predict_proba(Xwc), labels=[0, 1, 2])
 
     # Calibrated model (isotonic, fit via CV on pre-tournament data only)
     cal = CalibratedClassifierCV(XGBClassifier(**cfg), method='isotonic', cv=3)
     cal.fit(Xtr, ytr)
-    acc_c = accuracy_score(ywc, cal.predict(Xwc))
+    acc_c_3 = accuracy_score(ywc, cal.predict(Xwc))
+    acc_c, ko_c, _ = _grade(wc, cal.predict_proba(Xwc), cal.predict(Xwc), ko_start)
     ll_c  = log_loss(ywc, cal.predict_proba(Xwc), labels=[0, 1, 2])
 
     base = (ywc == 2).mean()
-    print(f"  WC {year}: {len(wc):>2} matches | base(home) {base:5.1%}")
-    print(f"           raw        -> acc {acc_r:5.1%} | logloss {ll_r:.3f}")
-    print(f"           calibrated -> acc {acc_c:5.1%} | logloss {ll_c:.3f}")
+    print(f"  WC {year}: {len(wc):>2} matches ({n_ko} knockout) | base(home) {base:5.1%}")
+    print(f"           raw        -> acc {acc_r:5.1%} (3-way {acc_r_3:5.1%}) | "
+          f"KO {ko_r:5.1%} | logloss {ll_r:.3f}")
+    print(f"           calibrated -> acc {acc_c:5.1%} (3-way {acc_c_3:5.1%}) | "
+          f"KO {ko_c:5.1%} | logloss {ll_c:.3f}")
 
 print("\n===== BACKTEST: past World Cups (squad + calibration, no leakage) =====")
 backtest_wc(2014, '2014-06-01')
@@ -1220,6 +1278,11 @@ for _stage, _ms in ROUNDS:
     for _m, (_x, _y) in _ms.items():
         _ko_part[_m] = (_bk_winners.get(_x), _bk_winners.get(_y))
         _ko_stage[_m] = _round_label[_stage]
+# Host boost in knockouts applies ONLY when the host plays at a true home-country
+# venue (verified from the match schedule), at half strength (KO_HOST_BOOST).
+KO_HOST_HOME = {
+    frozenset(('Mexico', 'England')): 'Mexico',   # R16 at Estadio Azteca, Mexico City
+}
 _ko_matches = []
 for _m, (_a, _b) in _ko_part.items():
     if not _a or not _b:
@@ -1228,7 +1291,8 @@ for _m, (_a, _b) in _ko_part.items():
     if _ko_lookup.get(_pair) is not None and _pair in _locked_ko:
         _ko_matches.append(_locked_ko[_pair])     # freeze pre-game prediction
         continue
-    _p = predict_match(_a, _b, host_team=None)    # host advantage wears off after groups
+    _host = KO_HOST_HOME.get(_pair)               # host boost only at true home venues
+    _p = predict_match(_a, _b, host_team=_host, boost=KO_HOST_BOOST)
     _ph, _pdr, _pa = _p[f'{_a} win'], _p['draw'], _p[f'{_b} win']
     _lh, _la = implied_lambdas(_ph, _pdr, _pa)
     _ko_matches.append({
