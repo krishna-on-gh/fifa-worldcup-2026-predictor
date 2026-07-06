@@ -555,13 +555,27 @@ def build_bracket_html(bk, stage_odds):
                 state = 'proj'
             col0.append((t, state, m))
 
-    # later columns: each cell is the WINNER of a match id -> carries data-slot=id
+    # later columns: each cell is the WINNER of a match id -> carries data-slot=id.
+    # A team is 'elim' if it LOST its next-round match (the parent match was won by
+    # someone else), so losers are struck through in EVERY round, not just the R32.
     labels = ['Round of 16', 'Quarterfinals', 'Semifinals', 'Final', 'Champion']
+    parent = bk.get('parent', {})
     win_cols = []      # (header, [(team, state, match_id)])
     for idx, ids in enumerate(bk['columns']):
         champ = idx == len(bk['columns']) - 1
-        cells = [(winners.get(str(m)), 'champ' if champ else ('won' if winners.get(str(m)) else 'tbd'), m)
-                 for m in ids]
+        cells = []
+        for m in ids:
+            w = winners.get(str(m))
+            nxt = winners.get(str(parent.get(str(m))))   # who won the next round
+            if not w:
+                state = 'tbd'
+            elif champ:
+                state = 'champ'
+            elif nxt and nxt != w:
+                state = 'elim'                           # advanced here, then lost
+            else:
+                state = 'won'
+            cells.append((w, state, m))
         win_cols.append((labels[idx], cells))
 
     def cell_html(team, state, slot, entrant=False):
