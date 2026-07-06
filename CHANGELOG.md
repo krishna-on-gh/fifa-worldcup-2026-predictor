@@ -3,6 +3,10 @@
 A running log of updates to the FIFA World Cup 2026 prediction model and dashboard.
 Add a new dated section at the top each time you ship something.
 
+**July 5, 2026**
+- **Added host advantage back** — The Canada vs. Morocco game was played in the US so it doesn't impact that game. Every other game will have host advantage manually added before each game at 0.5 * Group Stage Host advantage.
+- **Strike through losers of all stages in 'Run to the Final' tab** — Initially only the losers in the R32 stage were crossed out, now it will extend to all stages (in theory) going forward.
+
 **June 28, 2026**
 - **R32 Fixtures bug fix** — R32 fixtures weren't proper before, so I redid them and manually hardcoded them in
 - **Host advantage removed** — Removed host advantage for Mexico, USA, and Canada for the knockouts
