@@ -775,10 +775,19 @@ with tab_track:
         c1.metric("Predictions correct", f"{o_correct}/{o_total}")
         c2.metric("Hit rate", f"{o_correct / o_total:.0%}" if o_total else "—")
         st.caption("The model's pre-match pick vs the actual result, for every completed game.")
-        rows = [{'Date': r['date'], 'Match': f"{r['home']} {r['score']} {r['away']}",
-                 'Predicted': r['pred'], 'Actual': r['actual'],
-                 'Result': '✅' if r['correct'] else '❌', 'Stage': r['stage']}
-                for r in sorted(rec, key=lambda x: x['date'], reverse=True)]
+        # Records come from two sources with different date formats (group = ISO,
+        # knockouts = M/D/YYYY). Sort on the PARSED datetime, not the raw string,
+        # and show a single normalized date so the table reads chronologically.
+        def _dkey(r):
+            t = pd.to_datetime(r['date'], errors='coerce')
+            return t if pd.notna(t) else pd.Timestamp('1900-01-01')
+        rows = []
+        for r in sorted(rec, key=_dkey, reverse=True):
+            d = pd.to_datetime(r['date'], errors='coerce')
+            rows.append({'Date': d.strftime('%b %d') if pd.notna(d) else r['date'],
+                         'Match': f"{r['home']} {r['score']} {r['away']}",
+                         'Predicted': r['pred'], 'Actual': r['actual'],
+                         'Result': '✅' if r['correct'] else '❌', 'Stage': r['stage']})
         st.dataframe(pd.DataFrame(rows), hide_index=True,
                      use_container_width=True, height=420)
     else:
