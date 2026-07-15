@@ -1306,6 +1306,34 @@ for _m, (_a, _b) in _ko_part.items():
         'p_away_adv': round(float(_pa + 0.5 * _pdr), 3),
         'lh': _lh, 'la': _la,
     })
+
+# ---- Third-place play-off: the two Semifinal losers meet (bracket slot 103) ----
+# Not part of the main bracket tree, so it's built separately once both semifinal
+# losers are known. Same binary-advance treatment, frozen once played.
+_sf_ids = [_m for _m in _ko_part if _ko_stage.get(_m) == 'Semifinal']
+_third = []
+for _m in _sf_ids:
+    _a, _b = _ko_part[_m]
+    _w = _bk_winners.get(_m)
+    if _a and _b and _w:
+        _third.append(_b if _w == _a else _a)     # the loser of this semifinal
+if len(_third) == 2:
+    _a, _b = _third
+    _pair = frozenset((_a, _b))
+    if _ko_lookup.get(_pair) is not None and _pair in _locked_ko:
+        _ko_matches.append(_locked_ko[_pair])     # freeze pre-game prediction
+    else:
+        _p = predict_match(_a, _b, host_team=None)   # neutral (dead-rubber, no host)
+        _ph, _pdr, _pa = _p[f'{_a} win'], _p['draw'], _p[f'{_b} win']
+        _lh, _la = implied_lambdas(_ph, _pdr, _pa)
+        _ko_matches.append({
+            'match': 103, 'stage': 'Third Place Play-Off', 'home': _a, 'away': _b,
+            'p_home': round(float(_ph), 3), 'p_draw': round(float(_pdr), 3),
+            'p_away': round(float(_pa), 3),
+            'p_home_adv': round(float(_ph + 0.5 * _pdr), 3),
+            'p_away_adv': round(float(_pa + 0.5 * _pdr), 3),
+            'lh': _lh, 'la': _la,
+        })
 export['knockout_matches'] = _ko_matches
 
 with open('predictions.json', 'w', encoding='utf-8') as f:
